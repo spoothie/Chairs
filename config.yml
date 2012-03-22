@@ -1,0 +1,22 @@
+# Configuration of the Chairs plugin for Craftbukkit
+# ------
+# allowed-blocks: Set the blocks you want to be able to sit down on. Currently, only stairs-blocks are working. You can find a list of accepted block names at http://jd.bukkit.org/doxygen/d7/dd9/namespaceorg_1_1bukkit.html#ab7fa290bb19b9a830362aa88028ec80a.
+# item: Set the item you want to sit on.
+# auto-rotate: If set to true, you are automatically rotated to the descending face of the stairs-block when sitting down.
+# sneaking: If set to true, you have to sneak to sit down on a chair.
+# max-chair-width: Define how many blocks a chair can be long (set to a negative number for unlimited width).
+# sign-check: If set to true, you will only be able to sit down when there are signs on both of the ends of the chair.
+# sitting-height: Set how high you are sitting 'in' the stairs block (default is 0.7).
+# ------
+allowed-blocks:
+    - WOOD_STAIRS
+    - COBBLESTONE_STAIRS
+    - BRICK_STAIRS
+    - SMOOTH_STAIRS
+    - NETHER_BRICK_STAIRS
+item: LEVER
+auto-rotate: true
+sneaking: true
+max-chair-width: 3
+sign-check: false
+sitting-height: 0.7

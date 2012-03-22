@@ -1,0 +1,9 @@
+name: Chairs
+version: 1.0
+description: Let players sit on stairs and slabs.
+author: spoothie
+main: net.spoothie.chairs.Chairs
+commands:
+    chairs:
+        description: Reloads the Chairs configuration file.
+        usage: /chairs reload
