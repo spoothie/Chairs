@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Stairs;
@@ -83,14 +84,14 @@ public class EventListener implements Listener {
 						player.getVehicle().remove();
 
 					Location location = block.getLocation().add(0.5, (plugin.sittingheight - 0.5), 0.5);
-					Item drop = player.getWorld().dropItemNaturally(location, new ItemStack(Material.LEVER));
+					Item drop = player.getWorld().dropItemNaturally(location, new ItemStack(Material.PUMPKIN_STEM));
 					drop.setPickupDelay(Integer.MAX_VALUE);
 					drop.teleport(location);
 					drop.setVelocity(new Vector(0, 0, 0));
 					
 					// Check for players already sitting on the clicked block.
-					for(Entity e : drop.getNearbyEntities(0.1, 0.1, 0.1)) {
-						if(e != null && e instanceof Item) {
+					for(Entity e : drop.getNearbyEntities(0.2, 0.2, 0.2)) {
+						if(e != null && e instanceof Item && e.getPassenger() != null) {
 							drop.remove();
 							return;
 						}
@@ -100,7 +101,7 @@ public class EventListener implements Listener {
 					if(plugin.autorotate == true) {
 						Location plocation = player.getLocation();
 						
-						switch (stairs.getDescendingDirection()) {
+						switch(stairs.getDescendingDirection()) {
 							case NORTH:
 								plocation.setYaw(90);
 								break;
@@ -119,6 +120,26 @@ public class EventListener implements Listener {
 					
 					drop.setItemStack(new ItemStack(Material.LEVER));
 					drop.setPassenger(player);		
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onBlockBreak(BlockBreakEvent event) {
+		if(plugin.allowedBlocks.contains(event.getBlock().getType())) {
+		
+			Location location = event.getBlock().getLocation().add(0.5, (plugin.sittingheight - 0.5), 0.5);
+			Item drop = event.getPlayer().getWorld().dropItemNaturally(location, new ItemStack(Material.PUMPKIN_STEM));
+			drop.setPickupDelay(Integer.MAX_VALUE);
+			drop.teleport(location);
+			
+			// Get the item the player is sitting on.
+			for(Entity e : drop.getNearbyEntities(0.2, 0.2, 0.2)) {
+				if(e != null && e instanceof Item && e.getPassenger() != null) {
+					e.remove();
+					drop.remove();
+					return;
 				}
 			}
 		}
