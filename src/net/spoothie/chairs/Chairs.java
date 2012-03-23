@@ -75,7 +75,10 @@ public class Chairs extends JavaPlugin{
 	}
 
 	@Override public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (command.getName().equalsIgnoreCase("chairs") && ((Player)sender).hasPermission("chairs.reload")) {
+        if (command.getName().equalsIgnoreCase("chairs")) {
+        	if(sender instanceof Player && !((Player)sender).hasPermission("chairs.reload"))
+        		return true;
+        	
         	if(args.length > 0 && args[0].equalsIgnoreCase("reload")) {
         		reloadConfig();
         		loadConfig();
