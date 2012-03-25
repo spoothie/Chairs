@@ -95,7 +95,7 @@ public class EventListener implements Listener {
 					
 					// Check for players already sitting on the clicked block.
 					for(Entity e : drop.getNearbyEntities(0.2, 0.2, 0.2)) {
-						if(e != null && e instanceof Item && e.getPassenger() != null) {
+						if(e != null && e instanceof Item && e.getPassenger() != null && e != drop) {
 							drop.remove();
 							return;
 						}
@@ -137,15 +137,14 @@ public class EventListener implements Listener {
 			Item drop = event.getPlayer().getWorld().dropItemNaturally(location, new ItemStack(Material.PUMPKIN_STEM));
 			drop.setPickupDelay(Integer.MAX_VALUE);
 			drop.teleport(location);
-			
+
 			// Get the item the player is sitting on.
 			for(Entity e : drop.getNearbyEntities(0.2, 0.2, 0.2)) {
-				if(e != null && e instanceof Item && e.getPassenger() != null) {
+				if(e != null && e instanceof Item)
 					e.remove();
-					drop.remove();
-					return;
-				}
 			}
+			
+			drop.remove();
 		}
 	}
 	
