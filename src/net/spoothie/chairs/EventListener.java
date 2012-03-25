@@ -33,7 +33,11 @@ public class EventListener implements Listener {
 			if(plugin.allowedBlocks.contains(block.getType())) {
 				Player player = event.getPlayer();
 				Stairs stairs = (Stairs)block.getState().getData();
-				int chairwidth = 1; 
+				int chairwidth = 1;
+				
+				// Check if block beneath chair is solid.
+				if(block.getRelative(BlockFace.DOWN).getTypeId() == 0 || net.minecraft.server.Block.byId[block.getRelative(BlockFace.DOWN).getTypeId()].a() != true)
+					return;
 				
 				// Permissions Check
 				if(!player.hasPermission("chairs.sit"))
