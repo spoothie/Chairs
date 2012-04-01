@@ -12,6 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Stairs;
 import org.bukkit.util.Vector;
@@ -146,6 +147,14 @@ public class EventListener implements Listener {
 			
 			drop.remove();
 		}
+	}
+	
+	@EventHandler
+	public void onPlayerQuit(PlayerQuitEvent event) {
+		Entity vehicle = event.getPlayer().getVehicle();
+		
+		if(vehicle != null && vehicle instanceof Item)
+			vehicle.remove();
 	}
 	
 	private int getChairWidth(Block block, BlockFace face) {
