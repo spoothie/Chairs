@@ -1,5 +1,8 @@
 package net.spoothie.chairs;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -50,7 +53,7 @@ public class EventListener implements Listener {
 					return;
 				}
 				
-				//Check for signs.
+				// Check for signs.
 				if(plugin.signcheck == true) {
 					boolean sign1 = false;
 					boolean sign2 = false;
@@ -69,7 +72,7 @@ public class EventListener implements Listener {
 				}
 				
 				// Check for maximal chair width.
-				if(plugin.maxchairwidth >= 0) {
+				if(plugin.maxchairwidth > 0) {
 					if(stairs.getDescendingDirection() == BlockFace.NORTH || stairs.getDescendingDirection() == BlockFace.SOUTH) {
 						chairwidth += getChairWidth(block, BlockFace.EAST);
 						chairwidth += getChairWidth(block, BlockFace.WEST);
@@ -88,18 +91,12 @@ public class EventListener implements Listener {
 					if(player.getVehicle() != null)
 						player.getVehicle().remove();
 
-					Location location = block.getLocation().add(0.5, (plugin.sittingheight - 0.5), 0.5);
-					Item drop = player.getWorld().dropItemNaturally(location, new ItemStack(Material.PUMPKIN_STEM));
-					drop.setPickupDelay(Integer.MAX_VALUE);
-					drop.teleport(location);
-					drop.setVelocity(new Vector(0, 0, 0));
+					Item drop = dropSeat(block, player);
+					List<Item> drops = checkChair(drop);
 					
-					// Check for players already sitting on the clicked block.
-					for(Entity e : drop.getNearbyEntities(0.2, 0.2, 0.2)) {
-						if(e != null && e instanceof Item && e.getPassenger() != null && e != drop) {
-							drop.remove();
-							return;
-						}
+					if (drops != null) {
+						drop.remove();
+						return;
 					}
 					
 					// Rotate the player's view to the descending side of the block.
@@ -123,7 +120,9 @@ public class EventListener implements Listener {
 						player.teleport(plocation);
 					}
 					
-					drop.setItemStack(new ItemStack(Material.LEVER));
+					// Changing the drop material is only necessary for the item merge feature of CB++
+					// The client won't update the material, though.
+					drop.setItemStack(new ItemStack(Material.PUMPKIN_STEM));
 					drop.setPassenger(player);		
 				}
 			}
@@ -133,15 +132,10 @@ public class EventListener implements Listener {
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent event) {
 		if(plugin.allowedBlocks.contains(event.getBlock().getType())) {
-		
-			Location location = event.getBlock().getLocation().add(0.5, (plugin.sittingheight - 0.5), 0.5);
-			Item drop = event.getPlayer().getWorld().dropItemNaturally(location, new ItemStack(Material.PUMPKIN_STEM));
-			drop.setPickupDelay(Integer.MAX_VALUE);
-			drop.teleport(location);
-
-			// Get the item the player is sitting on.
+			Item drop = dropSeat(event.getBlock(), event.getPlayer());
+			
 			for(Entity e : drop.getNearbyEntities(0.2, 0.2, 0.2)) {
-				if(e != null && e instanceof Item)
+				if(e != null && e instanceof Item && e.getPassenger() != null)
 					e.remove();
 			}
 			
@@ -153,8 +147,33 @@ public class EventListener implements Listener {
 	public void onPlayerQuit(PlayerQuitEvent event) {
 		Entity vehicle = event.getPlayer().getVehicle();
 		
+		// Let players stand up when leaving the server.
 		if(vehicle != null && vehicle instanceof Item)
 			vehicle.remove();
+	}
+
+	private Item dropSeat(Block chair, Player player) {
+		Location location = chair.getLocation().add(0.5, (plugin.sittingheight - 0.5), 0.5);
+		Item drop = player.getWorld().dropItemNaturally(location, new ItemStack(Material.LEVER));
+		drop.setPickupDelay(Integer.MAX_VALUE);
+		drop.teleport(location);
+		drop.setVelocity(new Vector(0, 0, 0));
+		return drop;
+	}
+	
+	private List<Item> checkChair(Item drop) {
+		List<Item> drops = new ArrayList<Item>();
+		
+		// Check for already existing chair items.
+		for(Entity e : drop.getNearbyEntities(0.2, 0.2, 0.2)) {
+			if(e != null && e instanceof Item && e.getPassenger() != null)
+				drops.add(drop);
+		}
+		
+		if(drops.isEmpty() == false)
+			return drops;
+		
+		return null;
 	}
 	
 	private int getChairWidth(Block block, BlockFace face) {
