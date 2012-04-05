@@ -154,7 +154,7 @@ public class EventListener implements Listener {
 
 	private Item dropSeat(Block chair, Player player) {
 		Location location = chair.getLocation().add(0.5, (plugin.sittingheight - 0.5), 0.5);
-		Item drop = player.getWorld().dropItemNaturally(location, new ItemStack(Material.LEVER));
+		Item drop = player.getWorld().dropItemNaturally(location, new ItemStack(plugin.item));
 		drop.setPickupDelay(Integer.MAX_VALUE);
 		drop.teleport(location);
 		drop.setVelocity(new Vector(0, 0, 0));

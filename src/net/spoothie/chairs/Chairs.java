@@ -17,7 +17,7 @@ public class Chairs extends JavaPlugin{
 	public List<Material> allowedBlocks = new ArrayList<Material>();
 	public Material item;
 	public boolean sneaking, autorotate, signcheck;
-	public double sittingheight;
+	public double sittingheight, distance;
 	public int maxchairwidth;
 	
 	private File pluginFolder;
@@ -68,6 +68,7 @@ public class Chairs extends JavaPlugin{
 		sneaking = getConfig().getBoolean("sneaking");
 		signcheck = getConfig().getBoolean("sign-check");
 		sittingheight = getConfig().getDouble("sitting-height");
+		distance = getConfig().getDouble("sitting-height");
 		maxchairwidth = getConfig().getInt("max-chair-width");
 		
 		for(String type : getConfig().getStringList("allowed-blocks"))
