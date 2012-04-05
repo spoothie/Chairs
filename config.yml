@@ -8,6 +8,7 @@
 # sneaking: If set to true, you have to sneak to sit down on a chair.
 # max-chair-width: Define how many blocks a chair can be long (set to number <= 0 for unlimited width).
 # sign-check: If set to true, you will only be able to sit down when there are signs on both of the ends of the chair.
+# distance: The maximum distance between the chair (the center of the block) and the player to be able to sit down (to prevent glitching through walls, etc.).
 # sitting-height: Set how high you are sitting 'in' the stairs block (default is 0.7).
 # ------
 allowed-blocks:
@@ -21,4 +22,5 @@ auto-rotate: true
 sneaking: true
 max-chair-width: 3
 sign-check: false
+distance: 1
 sitting-height: 0.7

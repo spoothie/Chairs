@@ -53,6 +53,10 @@ public class EventListener implements Listener {
 					return;
 				}
 				
+				// Check for distance distance between player and chair.
+				if(plugin.distance > 0 && player.getLocation().distance(block.getLocation().add(0.5, 0, 0.5)) > plugin.distance)
+					return;
+				
 				// Check for signs.
 				if(plugin.signcheck == true) {
 					boolean sign1 = false;
