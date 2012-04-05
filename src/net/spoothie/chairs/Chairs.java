@@ -68,7 +68,7 @@ public class Chairs extends JavaPlugin{
 		sneaking = getConfig().getBoolean("sneaking");
 		signcheck = getConfig().getBoolean("sign-check");
 		sittingheight = getConfig().getDouble("sitting-height");
-		distance = getConfig().getDouble("sitting-height");
+		distance = getConfig().getDouble("distance");
 		maxchairwidth = getConfig().getInt("max-chair-width");
 		
 		for(String type : getConfig().getStringList("allowed-blocks"))

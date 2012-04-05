@@ -95,7 +95,7 @@ public class EventListener implements Listener {
 					if(player.getVehicle() != null)
 						player.getVehicle().remove();
 
-					Item drop = dropSeat(block, player);
+					Item drop = dropSeat(block);
 					List<Item> drops = checkChair(drop);
 					
 					if (drops != null) {
@@ -136,7 +136,7 @@ public class EventListener implements Listener {
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent event) {
 		if(plugin.allowedBlocks.contains(event.getBlock().getType())) {
-			Item drop = dropSeat(event.getBlock(), event.getPlayer());
+			Item drop = dropSeat(event.getBlock());
 			
 			for(Entity e : drop.getNearbyEntities(0.2, 0.2, 0.2)) {
 				if(e != null && e instanceof Item && e.getPassenger() != null)
@@ -155,10 +155,10 @@ public class EventListener implements Listener {
 		if(vehicle != null && vehicle instanceof Item)
 			vehicle.remove();
 	}
-
-	private Item dropSeat(Block chair, Player player) {
+	
+	private Item dropSeat(Block chair) {
 		Location location = chair.getLocation().add(0.5, (plugin.sittingheight - 0.5), 0.5);
-		Item drop = player.getWorld().dropItemNaturally(location, new ItemStack(plugin.item));
+		Item drop = location.getWorld().dropItemNaturally(location, new ItemStack(plugin.item));
 		drop.setPickupDelay(Integer.MAX_VALUE);
 		drop.teleport(location);
 		drop.setVelocity(new Vector(0, 0, 0));
