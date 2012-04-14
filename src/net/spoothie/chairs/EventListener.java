@@ -10,6 +10,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -127,7 +128,10 @@ public class EventListener implements Listener {
 					// Changing the drop material is only necessary for the item merge feature of CB++
 					// The client won't update the material, though.
 					drop.setItemStack(new ItemStack(Material.PUMPKIN_STEM));
-					drop.setPassenger(player);		
+					drop.setPassenger(player);	
+					
+					// Cancel BlockPlaceEvent Result, if player is rightclicking with a block in his hand.
+					event.setUseInteractedBlock(Result.DENY);
 				}
 			}
 		}
