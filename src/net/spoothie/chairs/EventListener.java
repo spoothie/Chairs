@@ -41,7 +41,7 @@ public class EventListener implements Listener {
 				int chairwidth = 1;
 				
 				// Check if block beneath chair is solid.
-				if(block.getRelative(BlockFace.DOWN).getTypeId() == 0 || net.minecraft.server.Block.byId[block.getRelative(BlockFace.DOWN).getTypeId()].a() != true)
+				if(block.getRelative(BlockFace.DOWN).getTypeId() == 0 || net.minecraft.server.Block.byId[block.getRelative(BlockFace.DOWN).getTypeId()].material.isSolid() != true)
 					return;
 				
 				// Permissions Check
