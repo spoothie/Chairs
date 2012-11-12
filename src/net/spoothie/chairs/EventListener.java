@@ -53,8 +53,10 @@ public class EventListener implements Listener {
                 }
 
                 // Permissions Check
-                if (!player.hasPermission("chairs.sit")) {
-                    return;
+                if (plugin.permissions) {
+                    if (!player.hasPermission("chairs.sit")) {
+                        return;
+                    }
                 }
 
                 // Check if player is sitting.
