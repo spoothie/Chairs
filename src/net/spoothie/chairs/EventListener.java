@@ -93,6 +93,10 @@ public class EventListener implements Listener {
                     if (plugin.notifyplayer) {
                         player.sendMessage(ChatColor.GRAY + "You are no longer sitting.");
                     }
+                    Packet40EntityMetadata packet = new Packet40EntityMetadata(player.getPlayer().getEntityId(), new ChairWatcher((byte) 0), false);
+                    for (Player play : Bukkit.getOnlinePlayers()) {
+                        ((CraftPlayer) play).getHandle().netServerHandler.sendPacket(packet);
+                    }
                     return;                    
                 }
 
