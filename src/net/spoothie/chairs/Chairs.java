@@ -2,7 +2,9 @@ package net.spoothie.chairs;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -13,11 +15,13 @@ public class Chairs extends JavaPlugin {
 
     public List<Material> allowedBlocks = new ArrayList<Material>();
     public Material item;
-    public boolean sneaking, autorotate, signcheck, permissions;
+    public boolean sneaking, autorotate, signcheck, permissions, notifyplayer;
     public double sittingheight, distance;
     public int maxchairwidth;
     private File pluginFolder;
     private File configFile;
+    public byte metadata;
+    public HashMap<String, Location> sit = new HashMap<String, Location>();
 
     @Override
     public void onEnable() {
@@ -62,6 +66,7 @@ public class Chairs extends JavaPlugin {
         distance = getConfig().getDouble("distance");
         maxchairwidth = getConfig().getInt("max-chair-width");
         permissions = getConfig().getBoolean("permissions");
+        notifyplayer = getConfig().getBoolean("notify-player");
 
         for (String type : getConfig().getStringList("allowed-blocks")) {
             allowedBlocks.add(Material.getMaterial(type));

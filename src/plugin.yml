@@ -1,7 +1,9 @@
 name: Chairs
-version: 1.5b
+version: 1.7
 description: Let players sit on stairs and slabs.
-authors: spoothie, cnaude
+authors: 
+ - spoothie
+ - cnaude
 main: net.spoothie.chairs.Chairs
 commands:
     chairs:

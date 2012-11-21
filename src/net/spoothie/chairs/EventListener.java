@@ -2,10 +2,14 @@ package net.spoothie.chairs;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.server.Packet40EntityMetadata;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -15,6 +19,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Stairs;
@@ -29,15 +34,36 @@ public class EventListener implements Listener {
     }
 
     @EventHandler
+    public void onPlayerMove (PlayerMoveEvent event) {
+        Player player = event.getPlayer();        
+        String pname = player.getName();
+        if (plugin.sit.containsKey(player.getName())) {            
+            if (player.getLocation().distance(plugin.sit.get(pname)) > 1) {                
+                if (plugin.notifyplayer) {
+                    player.sendMessage(ChatColor.GRAY + "You are no longer sitting.");
+                }
+                plugin.sit.remove(player.getName());
+                Packet40EntityMetadata packet = new Packet40EntityMetadata(player.getPlayer().getEntityId(), new ChairWatcher((byte) 0), false);
+                for (Player play : Bukkit.getOnlinePlayers()) {
+                    ((CraftPlayer) play).getHandle().netServerHandler.sendPacket(packet);
+                }
+            } else {
+                Packet40EntityMetadata packet = new Packet40EntityMetadata(player.getPlayer().getEntityId(), new ChairWatcher((byte) 4), false);
+                for (Player play : Bukkit.getOnlinePlayers()) {
+                    ((CraftPlayer) play).getHandle().netServerHandler.sendPacket(packet);
+                }
+            }
+        }
+    }
+    
+    @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.hasBlock() && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            Block block = event.getClickedBlock();
-            //event.getPlayer().sendMessage("Block: " + block.getType());
+            Block block = event.getClickedBlock();            
             if (plugin.allowedBlocks.contains(block.getType())) {
                 Player player = event.getPlayer();
-                Stairs stairs = (Stairs) block.getState().getData();
                 int chairwidth = 1;
-                        
+
                 // Check if block beneath chair is solid.
                 if (block.getRelative(BlockFace.DOWN).getType() == Material.AIR) {
                     return;
@@ -48,7 +74,7 @@ public class EventListener implements Listener {
                 if (block.getRelative(BlockFace.DOWN).getType() == Material.LAVA) {
                     return;
                 }
-                if (!net.minecraft.server.Block.byId[block.getTypeId()].material.isSolid()) {                        
+                if (!net.minecraft.server.Block.byId[block.getTypeId()].material.isSolid()) {
                     return;
                 }
 
@@ -60,9 +86,14 @@ public class EventListener implements Listener {
                 }
 
                 // Check if player is sitting.
-                if (!player.isSneaking() && player.getVehicle() != null) {
-                    player.getVehicle().remove();
-                    return;
+                
+                if (plugin.sit.containsKey(event.getPlayer().getName())) {
+                    plugin.sit.remove(player.getName());
+                    event.setCancelled(true);
+                    if (plugin.notifyplayer) {
+                        player.sendMessage(ChatColor.GRAY + "You are no longer sitting.");
+                    }
+                    return;                    
                 }
 
                 // Check for distance distance between player and chair.
@@ -71,7 +102,8 @@ public class EventListener implements Listener {
                 }
 
                 // Check for signs.
-                if (plugin.signcheck == true) {
+                if (plugin.signcheck == true && block instanceof Stairs) {
+                    Stairs stairs = (Stairs) block.getState().getData();
                     boolean sign1 = false;
                     boolean sign2 = false;
 
@@ -89,7 +121,8 @@ public class EventListener implements Listener {
                 }
 
                 // Check for maximal chair width.
-                if (plugin.maxchairwidth > 0) {
+                if (plugin.maxchairwidth > 0 && block instanceof Stairs) {
+                    Stairs stairs = (Stairs) block.getState().getData();
                     if (stairs.getDescendingDirection() == BlockFace.NORTH || stairs.getDescendingDirection() == BlockFace.SOUTH) {
                         chairwidth += getChairWidth(block, BlockFace.EAST);
                         chairwidth += getChairWidth(block, BlockFace.WEST);
@@ -109,18 +142,16 @@ public class EventListener implements Listener {
                         player.getVehicle().remove();
                     }
 
-                    Item drop = dropSeat(block);
-                    List<Item> drops = checkChair(drop);
-
-                    if (drops != null) {
-                        drop.remove();
-                        return;
-                    }
-
                     // Rotate the player's view to the descending side of the block.
-                    if (plugin.autorotate == true) {
-                        Location plocation = player.getLocation();
-
+                    
+                    Packet40EntityMetadata packet = new Packet40EntityMetadata(player.getPlayer().getEntityId(), new ChairWatcher((byte) 4), false);
+                    for (Player play : Bukkit.getOnlinePlayers()) {
+                        ((CraftPlayer) play).getHandle().netServerHandler.sendPacket(packet);
+                    }
+                                        
+                    if (plugin.autorotate == true && block instanceof Stairs) {
+                        Location plocation = block.getLocation();
+                        Stairs stairs = (Stairs) block.getState().getData();
                         switch (stairs.getDescendingDirection()) {
                             case NORTH:
                                 plocation.setYaw(90);
@@ -136,14 +167,16 @@ public class EventListener implements Listener {
                         }
 
                         player.teleport(plocation);
+
+                    } else {
+                        player.teleport(block.getLocation().add(0.5D, 0.0D, 0.5D));
                     }
-
-                    // Changing the drop material is only necessary for the item merge feature of CB++
-                    // The client won't update the material, though.
-                    drop.setItemStack(new ItemStack(Material.PUMPKIN_STEM));
-                    drop.setPassenger(player);
-
-                    // Cancel BlockPlaceEvent Result, if player is rightclicking with a block in his hand.
+                    player.setSneaking(true);
+                    if (plugin.notifyplayer) {
+                        player.sendMessage(ChatColor.GRAY + "You are now sitting.");
+                    }
+                    plugin.sit.put(player.getName(), block.getLocation());
+                    
                     event.setUseInteractedBlock(Result.DENY);
                 }
             }
@@ -177,28 +210,12 @@ public class EventListener implements Listener {
 
     private Item dropSeat(Block chair) {
         Location location = chair.getLocation().add(0.5, (plugin.sittingheight - 0.5), 0.5);
-        Item drop = location.getWorld().dropItemNaturally(location, new ItemStack(plugin.item));
+
+        Item drop = location.getWorld().dropItem(location, new ItemStack(plugin.item));
         drop.setPickupDelay(Integer.MAX_VALUE);
         drop.teleport(location);
         drop.setVelocity(new Vector(0, 0, 0));
         return drop;
-    }
-
-    private List<Item> checkChair(Item drop) {
-        List<Item> drops = new ArrayList<Item>();
-
-        // Check for already existing chair items.
-        for (Entity e : drop.getNearbyEntities(0.2, 0.2, 0.2)) {
-            if (e != null && e instanceof Item && e.getPassenger() != null) {
-                drops.add(drop);
-            }
-        }
-
-        if (drops.isEmpty() == false) {
-            return drops;
-        }
-
-        return null;
     }
 
     private int getChairWidth(Block block, BlockFace face) {

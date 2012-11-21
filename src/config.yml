@@ -29,3 +29,4 @@ sign-check: false
 distance: 2
 sitting-height: 0.7
 permissions: true
+notify-player: true
