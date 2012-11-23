@@ -3,13 +3,13 @@
 # A list of all compatible block and item names: http://bit.ly/AmJgMb.
 # ------
 # allowed-blocks: Set the blocks you want to be able to sit down on. Currently, only stairs-blocks are working.
-# item: Set the item you want to sit on (default is LEVER, because it is quite small so that you can't really see it).
 # auto-rotate: If set to true, you are automatically rotated to the descending face of the stairs-block when sitting down.
 # sneaking: If set to true, you have to sneak to sit down on a chair.
 # max-chair-width: Define how many blocks a chair can be long (set to number <= 0 for unlimited width).
 # sign-check: If set to true, you will only be able to sit down when there are signs on both of the ends of the chair.
 # distance: The maximum distance between the chair (the center of the block) and the player to be able to sit down (to prevent glitching through walls, etc.).
 # sitting-height: Set how high you are sitting 'in' the stairs block (default is 0.7).
+# upsidedown-check: If true then prevent players from sitting on upside down stairs.
 # ------
 allowed-blocks:
     - WOOD_STAIRS
@@ -21,7 +21,6 @@ allowed-blocks:
     - BRICK_STAIRS
     - SMOOTH_STAIRS
     - NETHER_BRICK_STAIRS
-item: LEVER
 auto-rotate: true
 sneaking: true
 max-chair-width: 3
@@ -30,3 +29,4 @@ distance: 2
 sitting-height: 0.7
 permissions: true
 notify-player: true
+upside-down-check: true
