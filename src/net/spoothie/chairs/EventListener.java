@@ -1,5 +1,8 @@
 package net.spoothie.chairs;
 
+import java.util.Timer;
+import java.util.TimerTask;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -11,7 +14,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.material.Stairs;
 
 public class EventListener implements Listener {
@@ -23,28 +29,65 @@ public class EventListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerMove (PlayerMoveEvent event) {
-        Player player = event.getPlayer();        
+    public void onPlayerMove(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
         String pname = player.getName();
         if (plugin.sit.containsKey(player.getName())) {
             Location from = player.getLocation();
             Location to = plugin.sit.get(pname);
             if (from.getWorld() == to.getWorld()) {
-                if (from.distance(to) > 1) {                
-                    plugin.sendStand(player);   
+                if (from.distance(to) > 1) {
+                    plugin.sendStand(player);
                 } else {
-                    plugin.sendSit(player);   
+                    plugin.sendSit(player);
                 }
             } else {
-                plugin.sendStand(player);                
+                plugin.sendStand(player);
             }
+        }
+    }
+
+    class sendSitTask extends TimerTask {
+
+        @Override
+        public void run() {
+            plugin.sendSit();
+        }
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Timer timer = new Timer();
+        long delay = 1 * 2000;
+        timer.schedule(new sendSitTask(), delay);
+        //plugin.sendSit();
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        String pName = event.getPlayer().getName();
+        if (plugin.sit.containsKey(pName)) {
+            plugin.sit.remove(pName);
         }
     }
     
     @EventHandler
+    public void onBlockDestroy(BlockBreakEvent event) {
+        Block block = event.getBlock();    
+        if (!plugin.sit.isEmpty()) {
+            for (String s : plugin.sit.keySet()) {
+                if (plugin.sit.get(s).equals(block.getLocation())) {
+                    Player player = Bukkit.getPlayer(s);
+                    plugin.sendStand(player);
+                }
+            }
+        }       
+    }
+
+    @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.hasBlock() && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            Block block = event.getClickedBlock();      
+            Block block = event.getClickedBlock();
             Stairs stairs = null;
             if (block.getState().getData() instanceof Stairs) {
                 stairs = (Stairs) block.getState().getData();
@@ -75,30 +118,30 @@ public class EventListener implements Listener {
                 }
 
                 // Check if player is sitting.
-                
+
                 if (plugin.sit.containsKey(event.getPlayer().getName())) {
                     plugin.sit.remove(player.getName());
                     event.setCancelled(true);
                     if (plugin.notifyplayer) {
                         player.sendMessage(ChatColor.GRAY + "You are no longer sitting.");
                     }
-                    plugin.sendStand(player);   
-                    return;                    
+                    plugin.sendStand(player);
+                    return;
                 }
 
                 // Check for distance distance between player and chair.
                 if (plugin.distance > 0 && player.getLocation().distance(block.getLocation().add(0.5, 0, 0.5)) > plugin.distance) {
                     return;
                 }
-                                
-                if (stairs != null) {                        
-                    if (stairs.isInverted() && plugin.upsidedowncheck) {                        
+
+                if (stairs != null) {
+                    if (stairs.isInverted() && plugin.invertedStairCheck) {
                         return;
-                    } 
+                    }
                 }
 
                 // Check for signs.
-                if (plugin.signcheck == true && stairs != null) {                    
+                if (plugin.signCheck == true && stairs != null) {
                     boolean sign1 = false;
                     boolean sign2 = false;
 
@@ -116,7 +159,7 @@ public class EventListener implements Listener {
                 }
 
                 // Check for maximal chair width.
-                if (plugin.maxchairwidth > 0 && stairs != null) {                    
+                if (plugin.maxChairWidth > 0 && stairs != null) {
                     if (stairs.getDescendingDirection() == BlockFace.NORTH || stairs.getDescendingDirection() == BlockFace.SOUTH) {
                         chairwidth += getChairWidth(block, BlockFace.EAST);
                         chairwidth += getChairWidth(block, BlockFace.WEST);
@@ -125,23 +168,32 @@ public class EventListener implements Listener {
                         chairwidth += getChairWidth(block, BlockFace.SOUTH);
                     }
 
-                    if (chairwidth > plugin.maxchairwidth) {
+                    if (chairwidth > plugin.maxChairWidth) {
                         return;
                     }
                 }
 
                 // Sit-down process.
                 if (!plugin.sneaking || (plugin.sneaking && event.getPlayer().isSneaking())) {
+                    if (plugin.seatOccupiedCheck) {
+                        if (!plugin.sit.isEmpty()) {
+                            for (String s : plugin.sit.keySet()) {
+                                if (plugin.sit.get(s).equals(block.getLocation())) {
+                                    player.sendMessage(ChatColor.GRAY + "This seat is occupied by " + s + "!");
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
                     if (player.getVehicle() != null) {
                         player.getVehicle().remove();
                     }
-                                        
-                    plugin.sendSit(player);   
-                                        
+
                     // Rotate the player's view to the descending side of the block.
-                    if (plugin.autorotate && stairs != null) {
+                    if (plugin.autoRotate && stairs != null) {
                         Location plocation = block.getLocation().clone();
-                        plocation.add(0.5D, (plugin.sittingheight - 0.5), 0.5D);
+                        plocation.add(0.5D, (plugin.sittingHeight - 0.5), 0.5D);
                         switch (stairs.getDescendingDirection()) {
                             case NORTH:
                                 plocation.setYaw(90);
@@ -166,8 +218,12 @@ public class EventListener implements Listener {
                         player.sendMessage(ChatColor.GRAY + "You are now sitting.");
                     }
                     plugin.sit.put(player.getName(), block.getLocation());
-                    
                     event.setUseInteractedBlock(Result.DENY);
+
+                    Timer timer = new Timer();
+                    long delay = 1 * 2000;
+                    timer.schedule(new sendSitTask(), delay);
+                    //plugin.sendSit(player);
                 }
             }
         }
@@ -177,7 +233,7 @@ public class EventListener implements Listener {
         int width = 0;
 
         // Go through the blocks next to the clicked block and check if there are any further stairs.
-        for (int i = 1; i <= plugin.maxchairwidth; i++) {
+        for (int i = 1; i <= plugin.maxChairWidth; i++) {
             Block relative = block.getRelative(face, i);
 
             if (plugin.allowedBlocks.contains(relative.getType()) && ((Stairs) relative.getState().getData()).getDescendingDirection() == ((Stairs) block.getState().getData()).getDescendingDirection()) {

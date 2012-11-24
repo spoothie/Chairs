@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.minecraft.server.Packet40EntityMetadata;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -18,13 +20,16 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class Chairs extends JavaPlugin {
 
     public List<Material> allowedBlocks = new ArrayList<Material>();    
-    public boolean sneaking, autorotate, signcheck, permissions, notifyplayer, upsidedowncheck;
-    public double sittingheight, distance;
-    public int maxchairwidth;
+    public boolean sneaking, autoRotate, signCheck, permissions, notifyplayer, invertedStairCheck, seatOccupiedCheck;
+    public double sittingHeight, distance;
+    public int maxChairWidth;
     private File pluginFolder;
     private File configFile;
     public byte metadata;
     public HashMap<String, Location> sit = new HashMap<String, Location>();
+    public static final String PLUGIN_NAME = "Chairs";
+    public static final String LOG_HEADER = "[" + PLUGIN_NAME + "]";
+    static final Logger log = Logger.getLogger("Minecraft");
 
     @Override
     public void onEnable() {
@@ -47,7 +52,7 @@ public class Chairs extends JavaPlugin {
             try {
                 pluginFolder.mkdir();
             } catch (Exception e) {
-                e.printStackTrace();
+                logInfo("ERROR: " + e.getMessage());                
             }
         }
 
@@ -55,24 +60,30 @@ public class Chairs extends JavaPlugin {
             try {
                 configFile.createNewFile();
             } catch (Exception e) {
-                e.printStackTrace();
+                logInfo("ERROR: " + e.getMessage());
             }
         }
     }
 
     private void loadConfig() {        
-        autorotate = getConfig().getBoolean("auto-rotate");
+        autoRotate = getConfig().getBoolean("auto-rotate");
         sneaking = getConfig().getBoolean("sneaking");
-        signcheck = getConfig().getBoolean("sign-check");
-        sittingheight = getConfig().getDouble("sitting-height");
+        signCheck = getConfig().getBoolean("sign-check");
+        sittingHeight = getConfig().getDouble("sitting-height");
         distance = getConfig().getDouble("distance");
-        maxchairwidth = getConfig().getInt("max-chair-width");
+        maxChairWidth = getConfig().getInt("max-chair-width");
         permissions = getConfig().getBoolean("permissions");
         notifyplayer = getConfig().getBoolean("notify-player");
-        upsidedowncheck = getConfig().getBoolean("upside-down-check");
+        invertedStairCheck = getConfig().getBoolean("upside-down-check");
+        seatOccupiedCheck = getConfig().getBoolean("seat-occupied-check");
 
         for (String type : getConfig().getStringList("allowed-blocks")) {
-            allowedBlocks.add(Material.getMaterial(type));
+            try {
+                allowedBlocks.add(Material.getMaterial(type));
+            }
+            catch (Exception e) {
+                logInfo("ERROR: " + e.getMessage());
+            }
         }
     }
 
@@ -103,6 +114,15 @@ public class Chairs extends JavaPlugin {
         }
     }
     
+    public void sendSit() {
+        for (String s : sit.keySet()) {
+            Player p = Bukkit.getPlayer(s);
+            if (p != null) {
+                sendSit(p);
+            }
+        }
+    }
+    
     // Send stand packet to all online players
     public void sendStand(Player p) {
         if (sit.containsKey(p.getName())) {
@@ -115,5 +135,13 @@ public class Chairs extends JavaPlugin {
         for (Player play : Bukkit.getOnlinePlayers()) {
             ((CraftPlayer) play).getHandle().netServerHandler.sendPacket(packet);
         }
+    }
+    
+    public void logInfo(String _message) {
+        log.log(Level.INFO, String.format("%s %s", LOG_HEADER, _message));
+    }
+
+    public void logError(String _message) {
+        log.log(Level.SEVERE, String.format("%s %s", LOG_HEADER, _message));
     }
 }

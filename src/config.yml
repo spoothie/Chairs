@@ -10,6 +10,7 @@
 # distance: The maximum distance between the chair (the center of the block) and the player to be able to sit down (to prevent glitching through walls, etc.).
 # sitting-height: Set how high you are sitting 'in' the stairs block (default is 0.7).
 # upsidedown-check: If true then prevent players from sitting on upside down stairs.
+# seat-occupied-check: Check if seat is already occupied.
 # ------
 allowed-blocks:
     - WOOD_STAIRS
@@ -30,3 +31,4 @@ sitting-height: 0.7
 permissions: true
 notify-player: true
 upside-down-check: true
+seat-occupied-check: true
