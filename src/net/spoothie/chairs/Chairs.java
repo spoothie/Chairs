@@ -6,21 +6,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.server.Packet40EntityMetadata;
+import net.minecraft.server.v1_4_5.Packet40EntityMetadata;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_4_5.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Chairs extends JavaPlugin {
 
     public List<Material> allowedBlocks = new ArrayList<Material>();    
-    public boolean sneaking, autoRotate, signCheck, permissions, notifyplayer, invertedStairCheck, seatOccupiedCheck;
+    public boolean sneaking, autoRotate, signCheck, permissions, notifyplayer, invertedStairCheck, seatOccupiedCheck, invertedStepCheck;
     public double sittingHeight, distance;
     public int maxChairWidth;
     private File pluginFolder;
@@ -33,6 +33,7 @@ public class Chairs extends JavaPlugin {
 
     @Override
     public void onEnable() {
+
         pluginFolder = getDataFolder();
         configFile = new File(pluginFolder, "config.yml");
         createConfig();
@@ -65,7 +66,7 @@ public class Chairs extends JavaPlugin {
         }
     }
 
-    private void loadConfig() {        
+    private void loadConfig() {       
         autoRotate = getConfig().getBoolean("auto-rotate");
         sneaking = getConfig().getBoolean("sneaking");
         signCheck = getConfig().getBoolean("sign-check");
@@ -76,10 +77,15 @@ public class Chairs extends JavaPlugin {
         notifyplayer = getConfig().getBoolean("notify-player");
         invertedStairCheck = getConfig().getBoolean("upside-down-check");
         seatOccupiedCheck = getConfig().getBoolean("seat-occupied-check");
+        invertedStepCheck = getConfig().getBoolean("upper-step-check");
 
         for (String type : getConfig().getStringList("allowed-blocks")) {
             try {
-                allowedBlocks.add(Material.getMaterial(type));
+                if (type.matches("\\d+")) {
+                    allowedBlocks.add(Material.getMaterial(Integer.parseInt(type)));
+                } else {
+                    allowedBlocks.add(Material.getMaterial(type));
+                }
             }
             catch (Exception e) {
                 logInfo("ERROR: " + e.getMessage());
@@ -126,7 +132,7 @@ public class Chairs extends JavaPlugin {
     // Send stand packet to all online players
     public void sendStand(Player p) {
         if (sit.containsKey(p.getName())) {
-            if (notifyplayer) {
+            if (notifyplayer) {                
                 p.sendMessage(ChatColor.GRAY + "You are no longer sitting.");
             }
             sit.remove(p.getName());
@@ -144,4 +150,5 @@ public class Chairs extends JavaPlugin {
     public void logError(String _message) {
         log.log(Level.SEVERE, String.format("%s %s", LOG_HEADER, _message));
     }
+    
 }

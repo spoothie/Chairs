@@ -1,5 +1,6 @@
 package net.spoothie.chairs;
 
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 import org.bukkit.Bukkit;
@@ -19,6 +20,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.material.Stairs;
+import org.bukkit.material.Step;
 
 public class EventListener implements Listener {
 
@@ -36,7 +38,7 @@ public class EventListener implements Listener {
             Location from = player.getLocation();
             Location to = plugin.sit.get(pname);
             if (from.getWorld() == to.getWorld()) {
-                if (from.distance(to) > 1) {
+                if (from.distance(to) > 1.5) {
                     plugin.sendStand(player);
                 } else {
                     plugin.sendSit(player);
@@ -75,12 +77,17 @@ public class EventListener implements Listener {
     public void onBlockDestroy(BlockBreakEvent event) {
         Block block = event.getBlock();    
         if (!plugin.sit.isEmpty()) {
+            ArrayList<String> standList = new ArrayList<String>();
             for (String s : plugin.sit.keySet()) {
                 if (plugin.sit.get(s).equals(block.getLocation())) {
-                    Player player = Bukkit.getPlayer(s);
-                    plugin.sendStand(player);
+                    standList.add(s);
                 }
             }
+            for (String s : standList) {
+                Player player = Bukkit.getPlayer(s);
+                plugin.sendStand(player);
+            }
+            standList.clear();
         }       
     }
 
@@ -89,36 +96,40 @@ public class EventListener implements Listener {
         if (event.hasBlock() && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             Block block = event.getClickedBlock();
             Stairs stairs = null;
+            Step step = null;
+            double sh = plugin.sittingHeight;
             if (block.getState().getData() instanceof Stairs) {
                 stairs = (Stairs) block.getState().getData();
+            } else if (block.getState().getData() instanceof Step) {
+                step = (Step) block.getState().getData();
+            } else {
+                sh += 1.0;
             }
-            if (plugin.allowedBlocks.contains(block.getType())) {
-                Player player = event.getPlayer();
+            Player player = event.getPlayer();
+            // Permissions Check
+            if (plugin.permissions) {
+                if (!player.hasPermission("chairs.sit")) {
+                    return;
+                }
+            }
+            if (plugin.allowedBlocks.contains(block.getType())
+                    || player.hasPermission("chairs.sit." + block.getTypeId())
+                    || player.hasPermission("chairs.sit." + block.getType().toString()) ) {
+                
                 int chairwidth = 1;
 
                 // Check if block beneath chair is solid.
-                if (block.getRelative(BlockFace.DOWN).getType() == Material.AIR) {
+                if (block.getRelative(BlockFace.DOWN).isLiquid()) {
                     return;
                 }
-                if (block.getRelative(BlockFace.DOWN).getType() == Material.WATER) {
+                if (block.getRelative(BlockFace.DOWN).isEmpty()) {
                     return;
                 }
-                if (block.getRelative(BlockFace.DOWN).getType() == Material.LAVA) {
+                if (!net.minecraft.server.v1_4_5.Block.byId[block.getTypeId()].material.isSolid()) {                   
                     return;
-                }
-                if (!net.minecraft.server.Block.byId[block.getTypeId()].material.isSolid()) {
-                    return;
-                }
-
-                // Permissions Check
-                if (plugin.permissions) {
-                    if (!player.hasPermission("chairs.sit")) {
-                        return;
-                    }
-                }
-
+                } 
+                
                 // Check if player is sitting.
-
                 if (plugin.sit.containsKey(event.getPlayer().getName())) {
                     plugin.sit.remove(player.getName());
                     event.setCancelled(true);
@@ -136,6 +147,11 @@ public class EventListener implements Listener {
 
                 if (stairs != null) {
                     if (stairs.isInverted() && plugin.invertedStairCheck) {
+                        return;
+                    }
+                }
+                if (step != null) {
+                    if (step.isInverted() && plugin.invertedStepCheck) {
                         return;
                     }
                 }
@@ -193,7 +209,7 @@ public class EventListener implements Listener {
                     // Rotate the player's view to the descending side of the block.
                     if (plugin.autoRotate && stairs != null) {
                         Location plocation = block.getLocation().clone();
-                        plocation.add(0.5D, (plugin.sittingHeight - 0.5), 0.5D);
+                        plocation.add(0.5D, (sh - 0.5D), 0.5D);
                         switch (stairs.getDescendingDirection()) {
                             case NORTH:
                                 plocation.setYaw(90);
@@ -207,11 +223,11 @@ public class EventListener implements Listener {
                             case WEST:
                                 plocation.setYaw(0);
                         }
-
                         player.teleport(plocation);
-
                     } else {
-                        player.teleport(block.getLocation().add(0.5D, 0.0D, 0.5D));
+                        Location plocation = block.getLocation().clone();
+                        plocation.setYaw(player.getLocation().getYaw());
+                        player.teleport(plocation.add(0.5D, (sh - 0.5D), 0.5D));
                     }
                     player.setSneaking(true);
                     if (plugin.notifyplayer) {
@@ -222,8 +238,7 @@ public class EventListener implements Listener {
 
                     Timer timer = new Timer();
                     long delay = 1 * 2000;
-                    timer.schedule(new sendSitTask(), delay);
-                    //plugin.sendSit(player);
+                    timer.schedule(new sendSitTask(), delay);                    
                 }
             }
         }

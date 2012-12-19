@@ -2,7 +2,7 @@
 # ------
 # A list of all compatible block and item names: http://bit.ly/AmJgMb.
 # ------
-# allowed-blocks: Set the blocks you want to be able to sit down on. Currently, only stairs-blocks are working.
+# allowed-blocks: Set the blocks you want to be able to sit down on. Use descriptive name or item ID.
 # auto-rotate: If set to true, you are automatically rotated to the descending face of the stairs-block when sitting down.
 # sneaking: If set to true, you have to sneak to sit down on a chair.
 # max-chair-width: Define how many blocks a chair can be long (set to number <= 0 for unlimited width).
@@ -32,3 +32,4 @@ permissions: true
 notify-player: true
 upside-down-check: true
 seat-occupied-check: true
+upper-step-check: true
