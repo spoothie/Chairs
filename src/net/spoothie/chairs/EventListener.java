@@ -21,6 +21,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.material.Stairs;
 import org.bukkit.material.Step;
+import org.bukkit.permissions.PermissionDefault;
 
 public class EventListener implements Listener {
 
@@ -94,7 +95,7 @@ public class EventListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.hasBlock() && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            Block block = event.getClickedBlock();
+            Block block = event.getClickedBlock();            
             Stairs stairs = null;
             Step step = null;
             double sh = plugin.sittingHeight;
@@ -112,9 +113,23 @@ public class EventListener implements Listener {
                     return;
                 }
             }
+            if (plugin.perItemPerms) {                
+                if (plugin.pm.getPermission("chairs.sit." + block.getTypeId()) == null) {
+                    plugin.pm.addPermission(new org.bukkit.permissions.Permission(
+                        "chairs.sit." + block.getTypeId(),
+                        "Allow players to sit on a '" + block.getType().name() + "'",                    
+                        PermissionDefault.FALSE));
+                }
+                if (plugin.pm.getPermission("chairs.sit." + block.getType().toString()) == null) {
+                    plugin.pm.addPermission(new org.bukkit.permissions.Permission(
+                        "chairs.sit." + block.getType().toString(),
+                        "Allow players to sit on a '" + block.getType().name() + "'",
+                        PermissionDefault.FALSE));
+                }                
+            }
             if (plugin.allowedBlocks.contains(block.getType())
-                    || player.hasPermission("chairs.sit." + block.getTypeId())
-                    || player.hasPermission("chairs.sit." + block.getType().toString()) ) {
+                    || (player.hasPermission("chairs.sit." + block.getTypeId()) && plugin.perItemPerms)
+                    || (player.hasPermission("chairs.sit." + block.getType().toString())&& plugin.perItemPerms) ) {
                 
                 int chairwidth = 1;
 
@@ -125,7 +140,7 @@ public class EventListener implements Listener {
                 if (block.getRelative(BlockFace.DOWN).isEmpty()) {
                     return;
                 }
-                if (!net.minecraft.server.v1_4_5.Block.byId[block.getTypeId()].material.isSolid()) {                   
+                if (!net.minecraft.server.v1_4_6.Block.byId[block.getTypeId()].material.isSolid()) {                   
                     return;
                 } 
                 

@@ -6,21 +6,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.server.v1_4_5.Packet40EntityMetadata;
+import net.minecraft.server.v1_4_6.Packet40EntityMetadata;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_4_5.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_4_6.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Chairs extends JavaPlugin {
 
     public List<Material> allowedBlocks = new ArrayList<Material>();    
-    public boolean sneaking, autoRotate, signCheck, permissions, notifyplayer, invertedStairCheck, seatOccupiedCheck, invertedStepCheck;
+    public boolean sneaking, autoRotate, signCheck, permissions, notifyplayer;
+    public boolean invertedStairCheck, seatOccupiedCheck, invertedStepCheck, perItemPerms;
     public double sittingHeight, distance;
     public int maxChairWidth;
     private File pluginFolder;
@@ -30,6 +32,7 @@ public class Chairs extends JavaPlugin {
     public static final String PLUGIN_NAME = "Chairs";
     public static final String LOG_HEADER = "[" + PLUGIN_NAME + "]";
     static final Logger log = Logger.getLogger("Minecraft");
+    public PluginManager pm;
 
     @Override
     public void onEnable() {
@@ -42,6 +45,7 @@ public class Chairs extends JavaPlugin {
         loadConfig();
         EventListener eventListener = new EventListener(this);
         getServer().getPluginManager().registerEvents(eventListener, this);
+        pm = this.getServer().getPluginManager();
     }
 
     @Override
@@ -78,6 +82,7 @@ public class Chairs extends JavaPlugin {
         invertedStairCheck = getConfig().getBoolean("upside-down-check");
         seatOccupiedCheck = getConfig().getBoolean("seat-occupied-check");
         invertedStepCheck = getConfig().getBoolean("upper-step-check");
+        perItemPerms = getConfig().getBoolean("per-item-perms");
 
         for (String type : getConfig().getStringList("allowed-blocks")) {
             try {
@@ -116,7 +121,8 @@ public class Chairs extends JavaPlugin {
     public void sendSit(Player p) {
         Packet40EntityMetadata packet = new Packet40EntityMetadata(p.getPlayer().getEntityId(), new ChairWatcher((byte) 4), false);
         for (Player play : Bukkit.getOnlinePlayers()) {
-            ((CraftPlayer) play).getHandle().netServerHandler.sendPacket(packet);
+            ((CraftPlayer) play).getHandle().playerConnection.sendPacket(packet);
+            //((CraftPlayer) play).getHandle().netServerHandler.sendPacket(packet);
         }
     }
     
@@ -139,7 +145,8 @@ public class Chairs extends JavaPlugin {
         }
         Packet40EntityMetadata packet = new Packet40EntityMetadata(p.getPlayer().getEntityId(), new ChairWatcher((byte) 0), false);
         for (Player play : Bukkit.getOnlinePlayers()) {
-            ((CraftPlayer) play).getHandle().netServerHandler.sendPacket(packet);
+            ((CraftPlayer) play).getHandle().playerConnection.sendPacket(packet);
+            //((CraftPlayer) play).getHandle().netServerHandler.sendPacket(packet);
         }
     }
     

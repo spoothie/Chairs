@@ -11,6 +11,7 @@
 # sitting-height: Set how high you are sitting 'in' the stairs block (default is 0.7).
 # upsidedown-check: If true then prevent players from sitting on upside down stairs.
 # seat-occupied-check: Check if seat is already occupied.
+# per-item-perms: Enable chairs.sit.[item] permission node. Set to false if you're sitting on every block.
 # ------
 allowed-blocks:
     - WOOD_STAIRS
@@ -33,3 +34,4 @@ notify-player: true
 upside-down-check: true
 seat-occupied-check: true
 upper-step-check: true
+per-item-perms: true

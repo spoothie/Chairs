@@ -1,5 +1,5 @@
 name: Chairs
-version: 1.13.0
+version: 1.13.2
 description: Let players sit on blocks.
 authors: 
  - spoothie
@@ -9,3 +9,7 @@ commands:
     chairs:
         description: Reloads the Chairs configuration file.
         usage: /chairs reload
+permissions:
+  chairs.sit:
+    description: Allows players to sit on blocks.
+    default: false       
