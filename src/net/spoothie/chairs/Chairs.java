@@ -15,13 +15,15 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.v1_4_6.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Chairs extends JavaPlugin {
 
     public List<Material> allowedBlocks = new ArrayList<Material>();    
-    public boolean sneaking, autoRotate, signCheck, permissions, notifyplayer;
+    public boolean sneaking, autoRotate, signCheck, permissions, notifyplayer, opsOverridePerms;
     public boolean invertedStairCheck, seatOccupiedCheck, invertedStepCheck, perItemPerms;
     public double sittingHeight, distance;
     public int maxChairWidth;
@@ -36,7 +38,7 @@ public class Chairs extends JavaPlugin {
 
     @Override
     public void onEnable() {
-
+        pm = this.getServer().getPluginManager();
         pluginFolder = getDataFolder();
         configFile = new File(pluginFolder, "config.yml");
         createConfig();
@@ -45,7 +47,6 @@ public class Chairs extends JavaPlugin {
         loadConfig();
         EventListener eventListener = new EventListener(this);
         getServer().getPluginManager().registerEvents(eventListener, this);
-        pm = this.getServer().getPluginManager();
     }
 
     @Override
@@ -83,6 +84,7 @@ public class Chairs extends JavaPlugin {
         seatOccupiedCheck = getConfig().getBoolean("seat-occupied-check");
         invertedStepCheck = getConfig().getBoolean("upper-step-check");
         perItemPerms = getConfig().getBoolean("per-item-perms");
+        opsOverridePerms = getConfig().getBoolean("ops-override-perms");
 
         for (String type : getConfig().getStringList("allowed-blocks")) {
             try {
@@ -95,6 +97,15 @@ public class Chairs extends JavaPlugin {
             catch (Exception e) {
                 logInfo("ERROR: " + e.getMessage());
             }
+        }
+        
+        if (pm.getPermission("chairs.sit") != null) {
+            pm.removePermission("chairs.sit");
+        }
+        if (opsOverridePerms) {
+            pm.addPermission(new Permission("chairs.sit","Allows players to sit on blocks",PermissionDefault.OP));
+        } else {
+            pm.addPermission(new Permission("chairs.sit","Allows players to sit on blocks",PermissionDefault.FALSE));
         }
     }
 

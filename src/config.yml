@@ -35,3 +35,4 @@ upside-down-check: true
 seat-occupied-check: true
 upper-step-check: true
 per-item-perms: true
+ops-override-perms: false

@@ -21,6 +21,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.material.Stairs;
 import org.bukkit.material.Step;
+import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 
 public class EventListener implements Listener {
@@ -73,10 +74,10 @@ public class EventListener implements Listener {
             plugin.sit.remove(pName);
         }
     }
-    
+
     @EventHandler
     public void onBlockDestroy(BlockBreakEvent event) {
-        Block block = event.getBlock();    
+        Block block = event.getBlock();
         if (!plugin.sit.isEmpty()) {
             ArrayList<String> standList = new ArrayList<String>();
             for (String s : plugin.sit.keySet()) {
@@ -89,13 +90,13 @@ public class EventListener implements Listener {
                 plugin.sendStand(player);
             }
             standList.clear();
-        }       
+        }
     }
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.hasBlock() && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            Block block = event.getClickedBlock();            
+            Block block = event.getClickedBlock();
             Stairs stairs = null;
             Step step = null;
             double sh = plugin.sittingHeight;
@@ -113,24 +114,22 @@ public class EventListener implements Listener {
                     return;
                 }
             }
-            if (plugin.perItemPerms) {                
+            if (plugin.perItemPerms) {
                 if (plugin.pm.getPermission("chairs.sit." + block.getTypeId()) == null) {
-                    plugin.pm.addPermission(new org.bukkit.permissions.Permission(
-                        "chairs.sit." + block.getTypeId(),
-                        "Allow players to sit on a '" + block.getType().name() + "'",                    
-                        PermissionDefault.FALSE));
+                    plugin.pm.addPermission(new Permission("chairs.sit." + block.getTypeId(),
+                            "Allow players to sit on a '" + block.getType().name() + "'",
+                            PermissionDefault.FALSE));
                 }
                 if (plugin.pm.getPermission("chairs.sit." + block.getType().toString()) == null) {
-                    plugin.pm.addPermission(new org.bukkit.permissions.Permission(
-                        "chairs.sit." + block.getType().toString(),
-                        "Allow players to sit on a '" + block.getType().name() + "'",
-                        PermissionDefault.FALSE));
-                }                
+                    plugin.pm.addPermission(new Permission("chairs.sit." + block.getType().toString(),
+                            "Allow players to sit on a '" + block.getType().name() + "'",
+                            PermissionDefault.FALSE));
+                }
             }
             if (plugin.allowedBlocks.contains(block.getType())
                     || (player.hasPermission("chairs.sit." + block.getTypeId()) && plugin.perItemPerms)
-                    || (player.hasPermission("chairs.sit." + block.getType().toString())&& plugin.perItemPerms) ) {
-                
+                    || (player.hasPermission("chairs.sit." + block.getType().toString()) && plugin.perItemPerms)) {
+
                 int chairwidth = 1;
 
                 // Check if block beneath chair is solid.
@@ -140,10 +139,10 @@ public class EventListener implements Listener {
                 if (block.getRelative(BlockFace.DOWN).isEmpty()) {
                     return;
                 }
-                if (!net.minecraft.server.v1_4_6.Block.byId[block.getTypeId()].material.isSolid()) {                   
+                if (!net.minecraft.server.v1_4_6.Block.byId[block.getTypeId()].material.isSolid()) {
                     return;
-                } 
-                
+                }
+
                 // Check if player is sitting.
                 if (plugin.sit.containsKey(event.getPlayer().getName())) {
                     plugin.sit.remove(player.getName());
@@ -227,16 +226,16 @@ public class EventListener implements Listener {
                         plocation.add(0.5D, (sh - 0.5D), 0.5D);
                         switch (stairs.getDescendingDirection()) {
                             case NORTH:
-                                plocation.setYaw(90);
-                                break;
-                            case EAST:
                                 plocation.setYaw(180);
                                 break;
+                            case EAST:
+                                plocation.setYaw(-90);
+                                break;
                             case SOUTH:
-                                plocation.setYaw(270);
+                                plocation.setYaw(0);
                                 break;
                             case WEST:
-                                plocation.setYaw(0);
+                                plocation.setYaw(90);
                         }
                         player.teleport(plocation);
                     } else {
@@ -253,7 +252,7 @@ public class EventListener implements Listener {
 
                     Timer timer = new Timer();
                     long delay = 1 * 2000;
-                    timer.schedule(new sendSitTask(), delay);                    
+                    timer.schedule(new sendSitTask(), delay);
                 }
             }
         }
