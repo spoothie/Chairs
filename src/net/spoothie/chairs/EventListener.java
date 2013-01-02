@@ -27,9 +27,11 @@ import org.bukkit.permissions.PermissionDefault;
 public class EventListener implements Listener {
 
     public Chairs plugin;
+    public ChairsIgnoreList ignoreList;
 
-    public EventListener(Chairs plugin) {
+    public EventListener(Chairs plugin, ChairsIgnoreList ignoreList) {
         this.plugin = plugin;
+        this.ignoreList = ignoreList;
     }
 
     @EventHandler
@@ -96,6 +98,7 @@ public class EventListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.hasBlock() && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            
             Block block = event.getClickedBlock();
             Stairs stairs = null;
             Step step = null;
@@ -108,6 +111,9 @@ public class EventListener implements Listener {
                 sh += 1.0;
             }
             Player player = event.getPlayer();
+            if (ignoreList.isIgnored(player.getName())) {
+                return;
+            }
             // Permissions Check
             if (plugin.permissions) {
                 if (!player.hasPermission("chairs.sit")) {

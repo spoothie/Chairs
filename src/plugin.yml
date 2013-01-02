@@ -1,5 +1,5 @@
 name: Chairs
-version: 1.13.5
+version: 1.15.0
 description: Let players sit on blocks.
 authors: 
  - spoothie
@@ -7,5 +7,15 @@ authors:
 main: net.spoothie.chairs.Chairs
 commands:
     chairs:
-        description: Reloads the Chairs configuration file.
-        usage: /chairs reload     
+        description: Various commands for Chairs.
+        usage: |
+          /<command> reload - reloads the configuration
+          /<command> off  - disable chairs for self
+          /<command> on - enable chairs for self
+permissions:
+  chairs.reload:
+    description: Reload configuration
+    default: op
+  chairs.self:
+    description: Allow player to turn chairs off and on
+    default: false

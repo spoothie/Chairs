@@ -11,8 +11,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.v1_4_6.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
@@ -21,7 +19,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Chairs extends JavaPlugin {
-
+    private static Chairs instance = null;
     public List<Material> allowedBlocks = new ArrayList<Material>();    
     public boolean sneaking, autoRotate, signCheck, permissions, notifyplayer, opsOverridePerms;
     public boolean invertedStairCheck, seatOccupiedCheck, invertedStepCheck, perItemPerms;
@@ -35,9 +33,12 @@ public class Chairs extends JavaPlugin {
     public static final String LOG_HEADER = "[" + PLUGIN_NAME + "]";
     static final Logger log = Logger.getLogger("Minecraft");
     public PluginManager pm;
+    public static ChairsIgnoreList ignoreList;
 
     @Override
     public void onEnable() {
+        instance = this;
+        ignoreList = new ChairsIgnoreList();
         pm = this.getServer().getPluginManager();
         pluginFolder = getDataFolder();
         configFile = new File(pluginFolder, "config.yml");
@@ -45,12 +46,13 @@ public class Chairs extends JavaPlugin {
         this.getConfig().options().copyDefaults(true);
         saveConfig();
         loadConfig();
-        EventListener eventListener = new EventListener(this);
-        getServer().getPluginManager().registerEvents(eventListener, this);
+        getServer().getPluginManager().registerEvents(new EventListener(this, ignoreList), this);
+        getCommand("chairs").setExecutor(new ChairsCommand(this, ignoreList));
     }
 
     @Override
     public void onDisable() {
+        ignoreList.save();
     }
 
     private void createConfig() {
@@ -71,7 +73,7 @@ public class Chairs extends JavaPlugin {
         }
     }
 
-    private void loadConfig() {       
+    public void loadConfig() {       
         autoRotate = getConfig().getBoolean("auto-rotate");
         sneaking = getConfig().getBoolean("sneaking");
         signCheck = getConfig().getBoolean("sign-check");
@@ -107,26 +109,7 @@ public class Chairs extends JavaPlugin {
         } else {
             pm.addPermission(new Permission("chairs.sit","Allows players to sit on blocks",PermissionDefault.FALSE));
         }
-    }
-
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (command.getName().equalsIgnoreCase("chairs")) {
-            if (sender instanceof Player && !((Player) sender).hasPermission("chairs.reload")) {
-                return true;
-            }
-
-            if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
-                reloadConfig();
-                loadConfig();
-                sender.sendMessage("Chairs configuration file reloaded.");
-            } else {
-                sender.sendMessage("Use '/chairs reload' to reload the configuration file.");
-            }
-        }
-
-        return true;
-    }
+    } 
     
     // Send sit packet to all online players
     public void sendSit(Player p) {
@@ -167,6 +150,10 @@ public class Chairs extends JavaPlugin {
 
     public void logError(String _message) {
         log.log(Level.SEVERE, String.format("%s %s", LOG_HEADER, _message));
+    }
+    
+    public static Chairs get() {
+        return instance;
     }
     
 }
