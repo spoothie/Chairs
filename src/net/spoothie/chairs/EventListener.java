@@ -270,11 +270,12 @@ public class EventListener implements Listener {
         // Go through the blocks next to the clicked block and check if there are any further stairs.
         for (int i = 1; i <= plugin.maxChairWidth; i++) {
             Block relative = block.getRelative(face, i);
-
-            if (plugin.allowedBlocks.contains(relative.getType()) && ((Stairs) relative.getState().getData()).getDescendingDirection() == ((Stairs) block.getState().getData()).getDescendingDirection()) {
-                width++;
-            } else {
-                break;
+            if (relative.getState().getData() instanceof Stairs) {
+                if (plugin.allowedBlocks.contains(relative.getType()) && ((Stairs) relative.getState().getData()).getDescendingDirection() == ((Stairs) block.getState().getData()).getDescendingDirection()) {
+                    width++;
+                } else {
+                    break;
+                }
             }
         }
 

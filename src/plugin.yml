@@ -12,10 +12,3 @@ commands:
           /<command> reload - reloads the configuration
           /<command> off  - disable chairs for self
           /<command> on - enable chairs for self
-permissions:
-  chairs.reload:
-    description: Reload configuration
-    default: op
-  chairs.self:
-    description: Allow player to turn chairs off and on
-    default: false

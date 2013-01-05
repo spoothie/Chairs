@@ -39,6 +39,7 @@ public class Chairs extends JavaPlugin {
     public void onEnable() {
         instance = this;
         ignoreList = new ChairsIgnoreList();
+        ignoreList.load();
         pm = this.getServer().getPluginManager();
         pluginFolder = getDataFolder();
         configFile = new File(pluginFolder, "config.yml");
@@ -101,14 +102,25 @@ public class Chairs extends JavaPlugin {
             }
         }
         
-        if (pm.getPermission("chairs.sit") != null) {
-            pm.removePermission("chairs.sit");
+        ArrayList<String> perms = new ArrayList<String>();
+        perms.add("chairs.sit");
+        perms.add("chairs.reload");
+        perms.add("chairs.self");
+        for (String s : perms) {
+            if (pm.getPermission(s) != null) {
+                pm.removePermission(s);
+            }
         }
+        PermissionDefault pd;
         if (opsOverridePerms) {
-            pm.addPermission(new Permission("chairs.sit","Allows players to sit on blocks",PermissionDefault.OP));
+            pd = PermissionDefault.OP;
         } else {
-            pm.addPermission(new Permission("chairs.sit","Allows players to sit on blocks",PermissionDefault.FALSE));
+            pd = PermissionDefault.FALSE;
         }
+        
+        pm.addPermission(new Permission("chairs.sit","Allow player to sit on a block.",pd));
+        pm.addPermission(new Permission("chairs.reload","Allow player to reload the Chairs configuration.",pd));
+        pm.addPermission(new Permission("chairs.self","Allow player to self disable or enable sitting.",pd));
     } 
     
     // Send sit packet to all online players

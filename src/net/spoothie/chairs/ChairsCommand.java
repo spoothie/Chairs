@@ -4,6 +4,7 @@
  */
 package net.spoothie.chairs;
 
+import java.io.Console;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -30,7 +31,7 @@ public class ChairsCommand implements CommandExecutor {
             return false;
         } 
         if (args[0].equalsIgnoreCase("reload")) {
-            if (sender.hasPermission("chairs.reload")) {
+            if (sender.hasPermission("chairs.reload") || !(sender instanceof Player)) {
                 plugin.reloadConfig();
                 plugin.loadConfig();
                 sender.sendMessage("Chairs configuration file reloaded.");
@@ -41,7 +42,7 @@ public class ChairsCommand implements CommandExecutor {
         if (sender instanceof Player) {
             Player p = (Player) sender;
             if (args[0].equalsIgnoreCase("on")) {
-                if (p.hasPermission("chairs.self")) {
+                if (p.hasPermission("chairs.self") || !plugin.permissions) {
                     ignoreList.removePlayer(p.getName());
                     p.sendMessage(ChatColor.GRAY + "You have enabled chairs for yourself!");
                 } else {
@@ -49,7 +50,7 @@ public class ChairsCommand implements CommandExecutor {
                 }
             }
             if (args[0].equalsIgnoreCase("off")) {
-                if (p.hasPermission("chairs.self")) {
+                if (p.hasPermission("chairs.self") || !plugin.permissions) {
                     ignoreList.addPlayer(p.getName());
                     p.sendMessage(ChatColor.GRAY + "You have disabled chairs for yourself!");
                 } else {
