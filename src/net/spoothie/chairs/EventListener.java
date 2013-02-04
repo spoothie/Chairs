@@ -7,8 +7,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
@@ -141,11 +144,11 @@ public class EventListener implements Listener {
                 // Check if block beneath chair is solid.
                 if (block.getRelative(BlockFace.DOWN).isLiquid()) {
                     return;
-                }
+                }                
                 if (block.getRelative(BlockFace.DOWN).isEmpty()) {
                     return;
-                }
-                if (!net.minecraft.server.v1_4_6.Block.byId[block.getTypeId()].material.isSolid()) {
+                }                
+                if (!block.getRelative(BlockFace.DOWN).getType().isSolid()) {                        
                     return;
                 }
 
@@ -182,11 +185,11 @@ public class EventListener implements Listener {
                     boolean sign2 = false;
 
                     if (stairs.getDescendingDirection() == BlockFace.NORTH || stairs.getDescendingDirection() == BlockFace.SOUTH) {
-                        sign1 = checkSign(block, BlockFace.EAST);
-                        sign2 = checkSign(block, BlockFace.WEST);
+                        sign1 = checkSign(block, BlockFace.EAST) || checkFrame(block, BlockFace.EAST, player);
+                        sign2 = checkSign(block, BlockFace.WEST) || checkFrame(block, BlockFace.WEST, player);
                     } else if (stairs.getDescendingDirection() == BlockFace.EAST || stairs.getDescendingDirection() == BlockFace.WEST) {
-                        sign1 = checkSign(block, BlockFace.NORTH);
-                        sign2 = checkSign(block, BlockFace.SOUTH);
+                        sign1 = checkSign(block, BlockFace.NORTH) || checkFrame(block, BlockFace.NORTH, player);
+                        sign2 = checkSign(block, BlockFace.SOUTH) || checkFrame(block, BlockFace.SOUTH, player);
                     }
 
                     if (!(sign1 == true && sign2 == true)) {
@@ -285,10 +288,37 @@ public class EventListener implements Listener {
     private boolean checkSign(Block block, BlockFace face) {
         // Go through the blocks next to the clicked block and check if are signs on the end.
         for (int i = 1; true; i++) {
-            Block relative = block.getRelative(face, i);
+            Block relative = block.getRelative(face, i);            
             if (!plugin.allowedBlocks.contains(relative.getType()) || (block.getState().getData() instanceof Stairs && ((Stairs) relative.getState().getData()).getDescendingDirection() != ((Stairs) block.getState().getData()).getDescendingDirection())) {
-                if (relative.getType() == Material.SIGN || relative.getType() == Material.WALL_SIGN || relative.getType() == Material.SIGN_POST) {
+                if (plugin.validSigns.contains(relative.getType())) {                
                     return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+    }
+    
+    private boolean checkFrame(Block block, BlockFace face, Player player) {
+        // Go through the blocks next to the clicked block and check if are signs on the end.
+        
+        for (int i = 1; true; i++) {
+            Block relative = block.getRelative(face, i);          
+            int x = relative.getLocation().getBlockX();
+            int y = relative.getLocation().getBlockY();
+            int z = relative.getLocation().getBlockZ();                                
+            if (!plugin.allowedBlocks.contains(relative.getType()) || (block.getState().getData() instanceof Stairs && ((Stairs) relative.getState().getData()).getDescendingDirection() != ((Stairs) block.getState().getData()).getDescendingDirection())) {
+                if (relative.getType().equals(Material.AIR)) {                                        
+                    for (Entity e : player.getNearbyEntities(plugin.distance, plugin.distance, plugin.distance)) {
+                        if (e instanceof ItemFrame && plugin.validSigns.contains(Material.ITEM_FRAME)) {
+                            int x2 = e.getLocation().getBlockX();
+                            int y2 = e.getLocation().getBlockY();
+                            int z2 = e.getLocation().getBlockZ();
+                            if (x == x2 && y == y2 && z == z2) {                                
+                                return true;
+                            }
+                        }
+                    }                    
                 } else {
                     return false;
                 }

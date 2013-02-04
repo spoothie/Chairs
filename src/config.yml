@@ -23,6 +23,11 @@ allowed-blocks:
     - BRICK_STAIRS
     - SMOOTH_STAIRS
     - NETHER_BRICK_STAIRS
+valid-signs:
+  - SIGN
+  - WALL_SIGN
+  - SIGN_POST
+  - ITEM_FRAME
 auto-rotate: true
 sneaking: true
 max-chair-width: 3

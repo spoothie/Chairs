@@ -5,8 +5,8 @@
 package net.spoothie.chairs;
 
 import java.util.ArrayList;
-import net.minecraft.server.v1_4_6.DataWatcher;
-import net.minecraft.server.v1_4_6.WatchableObject;
+import net.minecraft.server.v1_4_R1.DataWatcher;
+import net.minecraft.server.v1_4_R1.WatchableObject;
 
 
 /**

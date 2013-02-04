@@ -6,12 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.server.v1_4_6.Packet40EntityMetadata;
+import net.minecraft.server.v1_4_R1.Packet40EntityMetadata;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_4_6.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_4_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
@@ -21,6 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class Chairs extends JavaPlugin {
     private static Chairs instance = null;
     public List<Material> allowedBlocks = new ArrayList<Material>();    
+    public List<Material> validSigns = new ArrayList<Material>();    
     public boolean sneaking, autoRotate, signCheck, permissions, notifyplayer, opsOverridePerms;
     public boolean invertedStairCheck, seatOccupiedCheck, invertedStepCheck, perItemPerms;
     public double sittingHeight, distance;
@@ -34,6 +35,7 @@ public class Chairs extends JavaPlugin {
     static final Logger log = Logger.getLogger("Minecraft");
     public PluginManager pm;
     public static ChairsIgnoreList ignoreList;
+    
 
     @Override
     public void onEnable() {
@@ -95,6 +97,19 @@ public class Chairs extends JavaPlugin {
                     allowedBlocks.add(Material.getMaterial(Integer.parseInt(type)));
                 } else {
                     allowedBlocks.add(Material.getMaterial(type));
+                }
+            }
+            catch (Exception e) {
+                logInfo("ERROR: " + e.getMessage());
+            }
+        }
+        
+        for (String type : getConfig().getStringList("valid-signs")) {
+            try {
+                if (type.matches("\\d+")) {
+                    validSigns.add(Material.getMaterial(Integer.parseInt(type)));
+                } else {
+                    validSigns.add(Material.getMaterial(type));
                 }
             }
             catch (Exception e) {
