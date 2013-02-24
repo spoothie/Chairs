@@ -20,11 +20,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class Chairs extends JavaPlugin {
     private static Chairs instance = null;
-    public List<Material> allowedBlocks = new ArrayList<Material>();    
+    public List<ChairBlock> allowedBlocks = new ArrayList<ChairBlock>();    
     public List<Material> validSigns = new ArrayList<Material>();    
     public boolean sneaking, autoRotate, signCheck, permissions, notifyplayer, opsOverridePerms;
     public boolean invertedStairCheck, seatOccupiedCheck, invertedStepCheck, perItemPerms;
-    public double sittingHeight, distance;
+    public double sittingHeight, sittingHeightAdj, distance;
     public int maxChairWidth;
     private File pluginFolder;
     private File configFile;
@@ -34,8 +34,7 @@ public class Chairs extends JavaPlugin {
     public static final String LOG_HEADER = "[" + PLUGIN_NAME + "]";
     static final Logger log = Logger.getLogger("Minecraft");
     public PluginManager pm;
-    public static ChairsIgnoreList ignoreList;
-    
+    public static ChairsIgnoreList ignoreList; 
 
     @Override
     public void onEnable() {
@@ -81,6 +80,7 @@ public class Chairs extends JavaPlugin {
         sneaking = getConfig().getBoolean("sneaking");
         signCheck = getConfig().getBoolean("sign-check");
         sittingHeight = getConfig().getDouble("sitting-height");
+        sittingHeightAdj = getConfig().getDouble("sitting-height-adj");
         distance = getConfig().getDouble("distance");
         maxChairWidth = getConfig().getInt("max-chair-width");
         permissions = getConfig().getBoolean("permissions");
@@ -91,29 +91,45 @@ public class Chairs extends JavaPlugin {
         perItemPerms = getConfig().getBoolean("per-item-perms");
         opsOverridePerms = getConfig().getBoolean("ops-override-perms");
 
-        for (String type : getConfig().getStringList("allowed-blocks")) {
-            try {
+        for (String s : getConfig().getStringList("allowed-blocks")) {
+            String type;
+            double sh = sittingHeight;
+            if (s.contains(":")) {
+                String tmp[] = s.split(":",2);
+                type = tmp[0];  
+                sh = Double.parseDouble(tmp[1]);
+            } else {
+                type = s;                
+            }
+            try {                
+                Material mat;
                 if (type.matches("\\d+")) {
-                    allowedBlocks.add(Material.getMaterial(Integer.parseInt(type)));
+                    mat = Material.getMaterial(Integer.parseInt(type));
                 } else {
-                    allowedBlocks.add(Material.getMaterial(type));
+                    mat = Material.matchMaterial(type);
+                }
+                if (mat != null) {
+                    logInfo("Allowed block: " + mat.toString() + " => " + sh);
+                    allowedBlocks.add(new ChairBlock(mat,sh));
+                } else {
+                    logError("Invalid block: " + type);
                 }
             }
             catch (Exception e) {
-                logInfo("ERROR: " + e.getMessage());
+                logError(e.getMessage());
             }
         }
         
-        for (String type : getConfig().getStringList("valid-signs")) {
+        for (String type : getConfig().getStringList("valid-signs")) {            
             try {
                 if (type.matches("\\d+")) {
                     validSigns.add(Material.getMaterial(Integer.parseInt(type)));
                 } else {
-                    validSigns.add(Material.getMaterial(type));
+                    validSigns.add(Material.matchMaterial(type));
                 }
             }
             catch (Exception e) {
-                logInfo("ERROR: " + e.getMessage());
+                logError(e.getMessage());
             }
         }
         

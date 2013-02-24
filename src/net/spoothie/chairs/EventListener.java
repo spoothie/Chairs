@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
@@ -55,6 +54,7 @@ public class EventListener implements Listener {
             }
         }
     }
+   
 
     class sendSitTask extends TimerTask {
 
@@ -106,13 +106,8 @@ public class EventListener implements Listener {
             Stairs stairs = null;
             Step step = null;
             double sh = plugin.sittingHeight;
-            if (block.getState().getData() instanceof Stairs) {
-                stairs = (Stairs) block.getState().getData();
-            } else if (block.getState().getData() instanceof Step) {
-                step = (Step) block.getState().getData();
-            } else {
-                sh += 1.0;
-            }
+            boolean blockOkay = false;
+                        
             Player player = event.getPlayer();
             if (ignoreList.isIgnored(player.getName())) {
                 return;
@@ -135,9 +130,24 @@ public class EventListener implements Listener {
                             PermissionDefault.FALSE));
                 }
             }
-            if (plugin.allowedBlocks.contains(block.getType())
+                        
+            for (ChairBlock cb : plugin.allowedBlocks) {
+                if (cb.getMat().equals(block.getType())) {
+                    blockOkay = true;
+                    sh = cb.getSitHeight();                    
+                }
+            }
+            if (blockOkay
                     || (player.hasPermission("chairs.sit." + block.getTypeId()) && plugin.perItemPerms)
                     || (player.hasPermission("chairs.sit." + block.getType().toString()) && plugin.perItemPerms)) {
+                
+                if (block.getState().getData() instanceof Stairs) {
+                    stairs = (Stairs) block.getState().getData();
+                } else if (block.getState().getData() instanceof Step) {
+                    step = (Step) block.getState().getData();
+                } else {
+                    sh += plugin.sittingHeightAdj;
+                }
 
                 int chairwidth = 1;
 
