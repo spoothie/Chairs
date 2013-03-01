@@ -97,6 +97,15 @@ public class EventListener implements Listener {
             standList.clear();
         }
     }
+    
+    public boolean isValidChair(Block block) {
+        for (ChairBlock cb : plugin.allowedBlocks) {
+            if (cb.getMat().equals(block.getType())) {
+                return true;                
+            }
+        }
+        return false;
+    }
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
@@ -216,6 +225,8 @@ public class EventListener implements Listener {
                         chairwidth += getChairWidth(block, BlockFace.NORTH);
                         chairwidth += getChairWidth(block, BlockFace.SOUTH);
                     }
+                    
+                    plugin.logInfo("Width:" + chairwidth);
 
                     if (chairwidth > plugin.maxChairWidth) {
                         return;
@@ -283,8 +294,8 @@ public class EventListener implements Listener {
         // Go through the blocks next to the clicked block and check if there are any further stairs.
         for (int i = 1; i <= plugin.maxChairWidth; i++) {
             Block relative = block.getRelative(face, i);
-            if (relative.getState().getData() instanceof Stairs) {
-                if (plugin.allowedBlocks.contains(relative.getType()) && ((Stairs) relative.getState().getData()).getDescendingDirection() == ((Stairs) block.getState().getData()).getDescendingDirection()) {
+            if (relative.getState().getData() instanceof Stairs) {                
+                if (isValidChair(relative) && ((Stairs) relative.getState().getData()).getDescendingDirection() == ((Stairs) block.getState().getData()).getDescendingDirection()) {
                     width++;
                 } else {
                     break;
@@ -299,7 +310,7 @@ public class EventListener implements Listener {
         // Go through the blocks next to the clicked block and check if are signs on the end.
         for (int i = 1; true; i++) {
             Block relative = block.getRelative(face, i);            
-            if (!plugin.allowedBlocks.contains(relative.getType()) || (block.getState().getData() instanceof Stairs && ((Stairs) relative.getState().getData()).getDescendingDirection() != ((Stairs) block.getState().getData()).getDescendingDirection())) {
+            if (!isValidChair(relative) || (block.getState().getData() instanceof Stairs && ((Stairs) relative.getState().getData()).getDescendingDirection() != ((Stairs) block.getState().getData()).getDescendingDirection())) {
                 if (plugin.validSigns.contains(relative.getType())) {                
                     return true;
                 } else {
@@ -317,7 +328,7 @@ public class EventListener implements Listener {
             int x = relative.getLocation().getBlockX();
             int y = relative.getLocation().getBlockY();
             int z = relative.getLocation().getBlockZ();                                
-            if (!plugin.allowedBlocks.contains(relative.getType()) || (block.getState().getData() instanceof Stairs && ((Stairs) relative.getState().getData()).getDescendingDirection() != ((Stairs) block.getState().getData()).getDescendingDirection())) {
+            if (!isValidChair(relative) || (block.getState().getData() instanceof Stairs && ((Stairs) relative.getState().getData()).getDescendingDirection() != ((Stairs) block.getState().getData()).getDescendingDirection())) {
                 if (relative.getType().equals(Material.AIR)) {                                        
                     for (Entity e : player.getNearbyEntities(plugin.distance, plugin.distance, plugin.distance)) {
                         if (e instanceof ItemFrame && plugin.validSigns.contains(Material.ITEM_FRAME)) {
