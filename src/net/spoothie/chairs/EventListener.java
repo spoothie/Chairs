@@ -224,9 +224,7 @@ public class EventListener implements Listener {
                     } else if (stairs.getDescendingDirection() == BlockFace.EAST || stairs.getDescendingDirection() == BlockFace.WEST) {
                         chairwidth += getChairWidth(block, BlockFace.NORTH);
                         chairwidth += getChairWidth(block, BlockFace.SOUTH);
-                    }
-                    
-                    plugin.logInfo("Width:" + chairwidth);
+                    }                                        
 
                     if (chairwidth > plugin.maxChairWidth) {
                         return;
