@@ -43,3 +43,9 @@ seat-occupied-check: true
 upper-step-check: true
 per-item-perms: true
 ops-override-perms: false
+sit-effects:
+  enabled: false
+  interval: 20
+  healing:
+    amount: 1
+    max-percent: 100

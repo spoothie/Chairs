@@ -6,12 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.server.v1_4_R1.Packet40EntityMetadata;
+import net.minecraft.server.v1_5_R1.Packet40EntityMetadata;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_4_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_5_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
@@ -20,12 +20,17 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class Chairs extends JavaPlugin {
     private static Chairs instance = null;
+    public static ChairEffects chairEffects;
     public List<ChairBlock> allowedBlocks = new ArrayList<ChairBlock>();    
     public List<Material> validSigns = new ArrayList<Material>();    
     public boolean sneaking, autoRotate, signCheck, permissions, notifyplayer, opsOverridePerms;
     public boolean invertedStairCheck, seatOccupiedCheck, invertedStepCheck, perItemPerms;
+    public boolean sitEffectsEnabled;
     public double sittingHeight, sittingHeightAdj, distance;
     public int maxChairWidth;
+    public int sitMaxHealth;
+    public int sitHealthPerInterval;
+    public int sitEffectInterval;
     private File pluginFolder;
     private File configFile;
     public byte metadata;
@@ -50,11 +55,24 @@ public class Chairs extends JavaPlugin {
         loadConfig();
         getServer().getPluginManager().registerEvents(new EventListener(this, ignoreList), this);
         getCommand("chairs").setExecutor(new ChairsCommand(this, ignoreList));
+        if (sitEffectsEnabled) {
+            logInfo("Enabling sitting effects.");
+            chairEffects = new ChairEffects(this);
+        }
     }
 
     @Override
     public void onDisable() {
         ignoreList.save();
+        if (chairEffects != null) {
+            chairEffects.cancel();     
+        }
+    }
+    
+    public void restartEffectsTask() {
+        if (chairEffects != null) {
+            chairEffects.restart();
+        }
     }
 
     private void createConfig() {
@@ -90,6 +108,11 @@ public class Chairs extends JavaPlugin {
         invertedStepCheck = getConfig().getBoolean("upper-step-check");
         perItemPerms = getConfig().getBoolean("per-item-perms");
         opsOverridePerms = getConfig().getBoolean("ops-override-perms");
+        
+        sitEffectsEnabled = getConfig().getBoolean("sit-effects.enabled", false);
+        sitEffectInterval = getConfig().getInt("sit-effects.interval",20);
+        sitMaxHealth = getConfig().getInt("sit-effects.healing.max-percent",100);
+        sitHealthPerInterval = getConfig().getInt("sit-effects.healing.amount",1);
 
         for (String s : getConfig().getStringList("allowed-blocks")) {
             String type;
@@ -137,6 +160,7 @@ public class Chairs extends JavaPlugin {
         perms.add("chairs.sit");
         perms.add("chairs.reload");
         perms.add("chairs.self");
+        perms.add("chairs.sit.health");
         for (String s : perms) {
             if (pm.getPermission(s) != null) {
                 pm.removePermission(s);

@@ -33,6 +33,7 @@ public class ChairsCommand implements CommandExecutor {
             if (sender.hasPermission("chairs.reload") || !(sender instanceof Player)) {
                 plugin.reloadConfig();
                 plugin.loadConfig();
+                plugin.restartEffectsTask();
                 sender.sendMessage("Chairs configuration file reloaded.");
             } else {
                 sender.sendMessage(ChatColor.GRAY + "No permission to do this!");
