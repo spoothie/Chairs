@@ -4,7 +4,6 @@
  */
 package net.spoothie.chairs;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -34,9 +33,13 @@ public class ChairsCommand implements CommandExecutor {
                 plugin.reloadConfig();
                 plugin.loadConfig();
                 plugin.restartEffectsTask();
-                sender.sendMessage("Chairs configuration file reloaded.");
+                if (!plugin.msgReloaded.isEmpty()) {
+                    sender.sendMessage(plugin.msgReloaded);
+                }
             } else {
-                sender.sendMessage(ChatColor.GRAY + "No permission to do this!");
+                if (!plugin.msgNoPerm.isEmpty()) {
+                    sender.sendMessage(plugin.msgNoPerm);
+                }
             }
         }
         if (sender instanceof Player) {
@@ -44,17 +47,25 @@ public class ChairsCommand implements CommandExecutor {
             if (args[0].equalsIgnoreCase("on")) {
                 if (p.hasPermission("chairs.self") || !plugin.permissions) {
                     ignoreList.removePlayer(p.getName());
-                    p.sendMessage(ChatColor.GRAY + "You have enabled chairs for yourself!");
+                    if (!plugin.msgEnabled.isEmpty()) {
+                        p.sendMessage(plugin.msgEnabled);
+                    }
                 } else {
-                    p.sendMessage(ChatColor.GRAY + "No permission to do this!");
+                    if (!plugin.msgNoPerm.isEmpty()) {
+                        p.sendMessage(plugin.msgNoPerm);
+                    }
                 }
             }
             if (args[0].equalsIgnoreCase("off")) {
                 if (p.hasPermission("chairs.self") || !plugin.permissions) {
                     ignoreList.addPlayer(p.getName());
-                    p.sendMessage(ChatColor.GRAY + "You have disabled chairs for yourself!");
+                    if (!plugin.msgDisabled.isEmpty()) {
+                        p.sendMessage(plugin.msgDisabled);
+                    }
                 } else {
-                    p.sendMessage(ChatColor.GRAY + "No permission to do this!");
+                    if (!plugin.msgNoPerm.isEmpty()) {
+                        p.sendMessage(plugin.msgNoPerm);
+                    }
                 }
             }
         }

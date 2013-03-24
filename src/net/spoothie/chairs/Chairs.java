@@ -6,12 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.server.v1_5_R1.Packet40EntityMetadata;
+import net.minecraft.server.v1_5_R2.Packet40EntityMetadata;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_5_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_5_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
@@ -40,6 +40,7 @@ public class Chairs extends JavaPlugin {
     static final Logger log = Logger.getLogger("Minecraft");
     public PluginManager pm;
     public static ChairsIgnoreList ignoreList; 
+    public String msgSitting, msgStanding, msgOccupied, msgNoPerm, msgReloaded, msgDisabled, msgEnabled;
 
     @Override
     public void onEnable() {
@@ -113,6 +114,14 @@ public class Chairs extends JavaPlugin {
         sitEffectInterval = getConfig().getInt("sit-effects.interval",20);
         sitMaxHealth = getConfig().getInt("sit-effects.healing.max-percent",100);
         sitHealthPerInterval = getConfig().getInt("sit-effects.healing.amount",1);
+        
+        msgSitting = ChatColor.translateAlternateColorCodes('&',getConfig().getString("messages.sitting"));
+        msgStanding = ChatColor.translateAlternateColorCodes('&',getConfig().getString("messages.standing"));
+        msgOccupied = ChatColor.translateAlternateColorCodes('&',getConfig().getString("messages.occupied"));
+        msgNoPerm = ChatColor.translateAlternateColorCodes('&',getConfig().getString("messages.no-permission"));
+        msgEnabled = ChatColor.translateAlternateColorCodes('&',getConfig().getString("messages.enabled"));
+        msgDisabled = ChatColor.translateAlternateColorCodes('&',getConfig().getString("messages.disabled"));
+        msgReloaded = ChatColor.translateAlternateColorCodes('&',getConfig().getString("messages.reloaded"));
 
         for (String s : getConfig().getStringList("allowed-blocks")) {
             String type;
@@ -199,8 +208,8 @@ public class Chairs extends JavaPlugin {
     // Send stand packet to all online players
     public void sendStand(Player p) {
         if (sit.containsKey(p.getName())) {
-            if (notifyplayer) {                
-                p.sendMessage(ChatColor.GRAY + "You are no longer sitting.");
+            if (notifyplayer && !msgStanding.isEmpty()) {                
+                p.sendMessage(msgStanding);
             }
             sit.remove(p.getName());
         }

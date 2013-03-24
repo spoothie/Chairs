@@ -49,3 +49,12 @@ sit-effects:
   healing:
     amount: 1
     max-percent: 100
+messages:
+  sitting: '&7You are now sitting.'
+  standing: '&7You are no longer sitting.'
+  occupied: '&7This seat is occupied by &6%PLAYER%&7!'
+  reloaded: 'Chairs configuration reloaded.'
+  no-permission: '&cYou do not have permission to do this!'
+  enabled: '&7You have enabled chairs for yourself!'
+  disabled: '&7You have disabled chairs for yourself!'
+    

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -175,8 +174,8 @@ public class EventListener implements Listener {
                 if (plugin.sit.containsKey(event.getPlayer().getName())) {
                     plugin.sit.remove(player.getName());
                     event.setCancelled(true);
-                    if (plugin.notifyplayer) {
-                        player.sendMessage(ChatColor.GRAY + "You are no longer sitting.");
+                    if (plugin.notifyplayer && !plugin.msgStanding.isEmpty()) {
+                        player.sendMessage(plugin.msgStanding);
                     }
                     plugin.sendStand(player);
                     return;
@@ -237,7 +236,9 @@ public class EventListener implements Listener {
                         if (!plugin.sit.isEmpty()) {
                             for (String s : plugin.sit.keySet()) {
                                 if (plugin.sit.get(s).equals(block.getLocation())) {
-                                    player.sendMessage(ChatColor.GRAY + "This seat is occupied by " + s + "!");
+                                    if (!plugin.msgOccupied.isEmpty()) {
+                                        player.sendMessage(plugin.msgOccupied.replaceAll("%PLAYER%", s));
+                                    }
                                     return;
                                 }
                             }
@@ -272,8 +273,8 @@ public class EventListener implements Listener {
                         player.teleport(plocation.add(0.5D, (sh - 0.5D), 0.5D));
                     }
                     player.setSneaking(true);
-                    if (plugin.notifyplayer) {
-                        player.sendMessage(ChatColor.GRAY + "You are now sitting.");
+                    if (plugin.notifyplayer && !plugin.msgSitting.isEmpty()) {
+                        player.sendMessage(plugin.msgSitting);
                     }
                     plugin.sit.put(player.getName(), block.getLocation());
                     event.setUseInteractedBlock(Result.DENY);
