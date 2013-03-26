@@ -108,6 +108,10 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
+        if (event.getPlayer().getItemInHand().getType().isBlock() 
+                && plugin.ignoreIfBlockInHand) {
+            return;
+        }
         if (event.hasBlock() && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             
             Block block = event.getClickedBlock();
