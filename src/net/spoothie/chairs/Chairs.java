@@ -74,7 +74,9 @@ public class Chairs extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        ignoreList.save();
+        if (ignoreList != null) {
+            ignoreList.save();
+        }
         if (chairEffects != null) {
             chairEffects.cancel();     
         }
