@@ -1,20 +1,23 @@
 package net.spoothie.chairs;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.server.v1_5_R2.Packet40EntityMetadata;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_5_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -41,9 +44,15 @@ public class Chairs extends JavaPlugin {
     public PluginManager pm;
     public static ChairsIgnoreList ignoreList; 
     public String msgSitting, msgStanding, msgOccupied, msgNoPerm, msgReloaded, msgDisabled, msgEnabled;
+    private ProtocolManager protocolManager;
 
     @Override
     public void onEnable() {
+        if (!checkForProtocolLib()) {
+            logError("This plugin requires ProtocolLib. Please download the latest: http://dev.bukkit.org/server-mods/protocollib/");
+            Bukkit.getServer().getPluginManager().disablePlugin(this);
+            return;
+        } 
         instance = this;
         ignoreList = new ChairsIgnoreList();
         ignoreList.load();
@@ -60,6 +69,7 @@ public class Chairs extends JavaPlugin {
             logInfo("Enabling sitting effects.");
             chairEffects = new ChairEffects(this);
         }
+        protocolManager = ProtocolLibrary.getProtocolManager();
     }
 
     @Override
@@ -189,11 +199,19 @@ public class Chairs extends JavaPlugin {
     } 
     
     // Send sit packet to all online players
-    public void sendSit(Player p) {
-        Packet40EntityMetadata packet = new Packet40EntityMetadata(p.getPlayer().getEntityId(), new ChairWatcher((byte) 4), false);
-        for (Player play : Bukkit.getOnlinePlayers()) {
-            ((CraftPlayer) play).getHandle().playerConnection.sendPacket(packet);
-            //((CraftPlayer) play).getHandle().netServerHandler.sendPacket(packet);
+    public void sendSit(Player p) {      
+        PacketContainer fakeSit = protocolManager.createPacket(40); 
+        fakeSit.getSpecificModifier(int.class).write(0, p.getEntityId());
+        WrappedDataWatcher watcher = new WrappedDataWatcher();
+        watcher.setObject(0, (byte)4);                
+        fakeSit.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects());
+        
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            try {
+                protocolManager.sendServerPacket(onlinePlayer, fakeSit);            
+            } catch (Exception ex) {
+                // Nothing here
+            }
         }
     }
     
@@ -214,10 +232,20 @@ public class Chairs extends JavaPlugin {
             }
             sit.remove(p.getName());
         }
-        Packet40EntityMetadata packet = new Packet40EntityMetadata(p.getPlayer().getEntityId(), new ChairWatcher((byte) 0), false);
-        for (Player play : Bukkit.getOnlinePlayers()) {
-            ((CraftPlayer) play).getHandle().playerConnection.sendPacket(packet);
-            //((CraftPlayer) play).getHandle().netServerHandler.sendPacket(packet);
+        
+        PacketContainer fakeSit = protocolManager.createPacket(40);   
+        fakeSit.getSpecificModifier(int.class).write(0, p.getEntityId());
+        WrappedDataWatcher watcher = new WrappedDataWatcher();
+        watcher.setObject(0, (byte)0);                
+        fakeSit.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects());
+        
+        
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            try {
+                protocolManager.sendServerPacket(onlinePlayer, fakeSit);                   
+            } catch (Exception ex) {
+                // Nothing here
+            }
         }
     }
     
@@ -231,6 +259,15 @@ public class Chairs extends JavaPlugin {
     
     public static Chairs get() {
         return instance;
+    }
+    
+    public boolean checkForProtocolLib() {
+        Plugin plugin = getServer().getPluginManager().getPlugin("ProtocolLib");
+        if (plugin == null) {
+            return false;
+        } else {
+            return true;
+        }
     }
     
 }
