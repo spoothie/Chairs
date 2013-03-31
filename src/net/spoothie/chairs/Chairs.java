@@ -15,6 +15,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
@@ -74,6 +75,13 @@ public class Chairs extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        for (String pName : sit.keySet()) {
+            Player player = getServer().getPlayer(pName);
+            Location loc = player.getLocation().clone();
+            loc.setY(loc.getY() + 1);
+            player.teleport(loc, PlayerTeleportEvent.TeleportCause.PLUGIN);
+            
+        }
         if (ignoreList != null) {
             ignoreList.save();
         }

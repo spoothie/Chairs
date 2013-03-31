@@ -20,6 +20,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.material.Stairs;
 import org.bukkit.material.Step;
 import org.bukkit.permissions.Permission;
@@ -73,9 +74,12 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        String pName = event.getPlayer().getName();
-        if (plugin.sit.containsKey(pName)) {
-            plugin.sit.remove(pName);
+        Player player = event.getPlayer();
+        if (plugin.sit.containsKey(player.getName())) {
+            plugin.sendStand(player);
+            Location loc = player.getLocation().clone();
+            loc.setY(loc.getY() + 1);
+            player.teleport(loc, PlayerTeleportEvent.TeleportCause.PLUGIN);
         }
     }
 
