@@ -61,7 +61,7 @@ public class EventListener implements Listener {
     private void delayedSitTask() {
         plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, new Runnable() {
             @Override
-            public void run() {
+            public void run() {                
                 plugin.sendSit();
             }
         }, 20 );  
@@ -282,7 +282,7 @@ public class EventListener implements Listener {
                     }
                     plugin.sit.put(player.getName(), block.getLocation());
                     event.setUseInteractedBlock(Result.DENY);
-
+                    
                     delayedSitTask();
                 }
             }

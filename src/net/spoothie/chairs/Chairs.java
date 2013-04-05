@@ -208,19 +208,39 @@ public class Chairs extends JavaPlugin {
         pm.addPermission(new Permission("chairs.self","Allow player to self disable or enable sitting.",pd));
     } 
     
-    // Send sit packet to all online players
-    public void sendSit(Player p) {      
+    private PacketContainer getSitPacket(Player p) {
         PacketContainer fakeSit = protocolManager.createPacket(40); 
         fakeSit.getSpecificModifier(int.class).write(0, p.getEntityId());
         WrappedDataWatcher watcher = new WrappedDataWatcher();
-        watcher.setObject(0, (byte)4);                
+        watcher.setObject(0, (byte)4);           
         fakeSit.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects());
-        
+        return fakeSit;
+    }
+    
+    private PacketContainer getStandPacket(Player p) {
+        PacketContainer fakeSit = protocolManager.createPacket(40);   
+        fakeSit.getSpecificModifier(int.class).write(0, p.getEntityId());
+        WrappedDataWatcher watcher = new WrappedDataWatcher();
+        watcher.setObject(0, (byte)0);                
+        fakeSit.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects());         
+        return fakeSit;
+    }
+    
+    // Send sit packet to all online players that are on same world and can see player
+    public void sendSit(Player p) {              
+        sendPacketToPlayers(getSitPacket(p),p);
+    }
+    
+    private void sendPacketToPlayers(PacketContainer pc, Player p) {
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            try {
-                protocolManager.sendServerPacket(onlinePlayer, fakeSit);            
-            } catch (Exception ex) {
-                // Nothing here
+            if (onlinePlayer.canSee(p)) {
+                if (onlinePlayer.getWorld().equals(p.getWorld())) {
+                    try {                        
+                        protocolManager.sendServerPacket(onlinePlayer, pc);            
+                    } catch (Exception ex) {
+                        // Nothing here
+                    }
+                }
             }
         }
     }
@@ -241,22 +261,8 @@ public class Chairs extends JavaPlugin {
                 p.sendMessage(msgStanding);
             }
             sit.remove(p.getName());
-        }
-        
-        PacketContainer fakeSit = protocolManager.createPacket(40);   
-        fakeSit.getSpecificModifier(int.class).write(0, p.getEntityId());
-        WrappedDataWatcher watcher = new WrappedDataWatcher();
-        watcher.setObject(0, (byte)0);                
-        fakeSit.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects());
-        
-        
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            try {
-                protocolManager.sendServerPacket(onlinePlayer, fakeSit);                   
-            } catch (Exception ex) {
-                // Nothing here
-            }
-        }
+        }                           
+        sendPacketToPlayers(getStandPacket(p),p);
     }
     
     public void logInfo(String _message) {
