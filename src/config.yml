@@ -25,6 +25,7 @@ allowed-blocks:
     - BRICK_STAIRS
     - SMOOTH_STAIRS
     - NETHER_BRICK_STAIRS
+    - QUARTZ_STAIRS
 valid-signs:
   - SIGN
   - WALL_SIGN
