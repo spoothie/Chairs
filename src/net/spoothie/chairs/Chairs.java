@@ -226,7 +226,7 @@ public class Chairs extends JavaPlugin {
     }
     
     public void sendSit() {
-        for (String s : sit.keySet()) {
+        for (String s : sit.keySet()) {            
             Player p = Bukkit.getPlayer(s);
             if (p != null) {
                 sendSit(p);

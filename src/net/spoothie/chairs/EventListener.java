@@ -1,8 +1,6 @@
 package net.spoothie.chairs;
 
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -54,22 +52,19 @@ public class EventListener implements Listener {
             }
         }
     }
-   
-
-    class sendSitTask extends TimerTask {
-
-        @Override
-        public void run() {
-            plugin.sendSit();
-        }
-    }
-
+    
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        Timer timer = new Timer();
-        long delay = 1 * 2000;
-        timer.schedule(new sendSitTask(), delay);
-        //plugin.sendSit();
+    public void onPlayerJoin(PlayerJoinEvent event) { 
+        delayedSitTask();
+    }
+    
+    private void delayedSitTask() {
+        plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, new Runnable() {
+            @Override
+            public void run() {
+                plugin.sendSit();
+            }
+        }, 20 );  
     }
 
     @EventHandler
@@ -113,6 +108,7 @@ public class EventListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getPlayer().getItemInHand().getType().isBlock() 
+                && (event.getPlayer().getItemInHand().getTypeId() != 0)
                 && plugin.ignoreIfBlockInHand) {
             return;
         }
@@ -287,9 +283,7 @@ public class EventListener implements Listener {
                     plugin.sit.put(player.getName(), block.getLocation());
                     event.setUseInteractedBlock(Result.DENY);
 
-                    Timer timer = new Timer();
-                    long delay = 1 * 2000;
-                    timer.schedule(new sendSitTask(), delay);
+                    delayedSitTask();
                 }
             }
         }
