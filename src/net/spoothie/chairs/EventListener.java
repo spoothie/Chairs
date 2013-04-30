@@ -59,7 +59,7 @@ public class EventListener implements Listener {
     }
     
     private void delayedSitTask() {
-        plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, new Runnable() {
+        plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
             @Override
             public void run() {                
                 plugin.sendSit();
@@ -309,9 +309,11 @@ public class EventListener implements Listener {
 
     private boolean checkSign(Block block, BlockFace face) {
         // Go through the blocks next to the clicked block and check if are signs on the end.
-        for (int i = 1; true; i++) {
+        for (int i = 1; i <= 100; i++) {
             Block relative = block.getRelative(face, i);            
-            if (!isValidChair(relative) || (block.getState().getData() instanceof Stairs && ((Stairs) relative.getState().getData()).getDescendingDirection() != ((Stairs) block.getState().getData()).getDescendingDirection())) {
+            if (!isValidChair(relative) || (block.getState().getData() instanceof Stairs 
+                    && ((Stairs) relative.getState().getData()).getDescendingDirection() 
+                    != ((Stairs) block.getState().getData()).getDescendingDirection())) {
                 if (plugin.validSigns.contains(relative.getType())) {                
                     return true;
                 } else {
@@ -319,17 +321,20 @@ public class EventListener implements Listener {
                 }
             }
         }
+        return false;
     }
     
     private boolean checkFrame(Block block, BlockFace face, Player player) {
         // Go through the blocks next to the clicked block and check if are signs on the end.
         
-        for (int i = 1; true; i++) {
+        for (int i = 1; i <= 100; i++) {            
             Block relative = block.getRelative(face, i);          
             int x = relative.getLocation().getBlockX();
             int y = relative.getLocation().getBlockY();
             int z = relative.getLocation().getBlockZ();                                
-            if (!isValidChair(relative) || (block.getState().getData() instanceof Stairs && ((Stairs) relative.getState().getData()).getDescendingDirection() != ((Stairs) block.getState().getData()).getDescendingDirection())) {
+            if (!isValidChair(relative) || (block.getState().getData() instanceof Stairs 
+                    && ((Stairs) relative.getState().getData()).getDescendingDirection() 
+                    != ((Stairs) block.getState().getData()).getDescendingDirection())) {
                 if (relative.getType().equals(Material.AIR)) {                                        
                     for (Entity e : player.getNearbyEntities(plugin.distance, plugin.distance, plugin.distance)) {
                         if (e instanceof ItemFrame && plugin.validSigns.contains(Material.ITEM_FRAME)) {
@@ -344,7 +349,8 @@ public class EventListener implements Listener {
                 } else {
                     return false;
                 }
-            }
+            }            
         }
+        return false;
     }
 }
