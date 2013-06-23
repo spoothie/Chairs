@@ -1,4 +1,4 @@
-package net.spoothie.chairs;
+package com.cnaude.chairs;
 
 import java.util.ArrayList;
 import org.bukkit.Bukkit;
@@ -55,6 +55,11 @@ public class EventListener implements Listener {
     
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) { 
+        delayedSitTask();
+    }
+    
+    @EventHandler
+    public void onPlayerTeleport(PlayerTeleportEvent event) { 
         delayedSitTask();
     }
     

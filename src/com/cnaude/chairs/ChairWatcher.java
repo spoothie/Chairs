@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package net.spoothie.chairs;
+package com.cnaude.chairs;
 
 import java.util.ArrayList;
 import net.minecraft.server.v1_5_R3.DataWatcher;

@@ -1,4 +1,4 @@
-package net.spoothie.chairs;
+package com.cnaude.chairs;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
