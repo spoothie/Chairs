@@ -26,7 +26,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class Chairs extends JavaPlugin {
     private static Chairs instance = null;
     public static ChairEffects chairEffects;
-    public List<ChairBlock> allowedBlocks = new ArrayList<ChairBlock>();    
+    public List<ChairBlock> allowedBlocks = new ArrayList<ChairBlock>();
     public List<Material> validSigns = new ArrayList<Material>();    
     public boolean sneaking, autoRotate, signCheck, permissions, notifyplayer, opsOverridePerms;
     public boolean invertedStairCheck, seatOccupiedCheck, invertedStepCheck, perItemPerms, ignoreIfBlockInHand;
@@ -152,10 +152,16 @@ public class Chairs extends JavaPlugin {
         for (String s : getConfig().getStringList("allowed-blocks")) {
             String type;
             double sh = sittingHeight;
+            String d = "0";
             if (s.contains(":")) {
-                String tmp[] = s.split(":",2);
-                type = tmp[0];  
-                sh = Double.parseDouble(tmp[1]);
+                String tmp[] = s.split(":",3);
+                type = tmp[0]; 
+                if (!tmp[1].isEmpty()) {
+                    sh = Double.parseDouble(tmp[1]);
+                }                
+                if (tmp.length == 3) {
+                    d = tmp[2];
+                }
             } else {
                 type = s;                
             }
@@ -167,8 +173,8 @@ public class Chairs extends JavaPlugin {
                     mat = Material.matchMaterial(type);
                 }
                 if (mat != null) {
-                    logInfo("Allowed block: " + mat.toString() + " => " + sh);
-                    allowedBlocks.add(new ChairBlock(mat,sh));
+                    logInfo("Allowed block: " + mat.toString() + " => " + sh + " => " + d);
+                    allowedBlocks.add(new ChairBlock(mat,sh,d));
                 } else {
                     logError("Invalid block: " + type);
                 }

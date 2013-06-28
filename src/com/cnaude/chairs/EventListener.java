@@ -21,6 +21,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.material.Stairs;
 import org.bukkit.material.Step;
+import org.bukkit.material.WoodenStep;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 
@@ -122,8 +123,9 @@ public class EventListener implements Listener {
             Block block = event.getClickedBlock();
             Stairs stairs = null;
             Step step = null;
+            WoodenStep wStep = null;
             double sh = plugin.sittingHeight;
-            boolean blockOkay = false;
+            boolean blockOkay = false;                        
                         
             Player player = event.getPlayer();
             if (ignoreList.isIgnored(player.getName())) {
@@ -149,21 +151,33 @@ public class EventListener implements Listener {
             }
                         
             for (ChairBlock cb : plugin.allowedBlocks) {
-                if (cb.getMat().equals(block.getType())) {
+                //plugin.logInfo("Comparing: (" + cb.getMat().name() + " ? " + block.getType().name() + ") ("
+                //        + cb.getDamage() + " ? " + block.getData() + ")");
+                if (cb.getMat().equals(block.getType()) 
+                        && cb.getDamage() == block.getData()) {
                     blockOkay = true;
-                    sh = cb.getSitHeight();                    
+                    sh = cb.getSitHeight();
+                    continue;
                 }
             }
             if (blockOkay
+                    || (player.hasPermission("chairs.sit." + block.getTypeId() + ":" + block.getData()) && plugin.perItemPerms)
+                    || (player.hasPermission("chairs.sit." + block.getType().toString() + ":" + block.getData()) && plugin.perItemPerms)
                     || (player.hasPermission("chairs.sit." + block.getTypeId()) && plugin.perItemPerms)
                     || (player.hasPermission("chairs.sit." + block.getType().toString()) && plugin.perItemPerms)) {
                 
                 if (block.getState().getData() instanceof Stairs) {
                     stairs = (Stairs) block.getState().getData();
+                    //plugin.logInfo("STAIR");
                 } else if (block.getState().getData() instanceof Step) {
                     step = (Step) block.getState().getData();
+                    //plugin.logInfo("STEP");
+                } else if (block.getState().getData() instanceof WoodenStep) {
+                    wStep = (WoodenStep) block.getState().getData();
+                    //plugin.logInfo("WOODEN_STEP");
                 } else {
                     sh += plugin.sittingHeightAdj;
+                    //plugin.logInfo("OTHER");
                 }
 
                 int chairwidth = 1;
@@ -202,6 +216,11 @@ public class EventListener implements Listener {
                 }
                 if (step != null) {
                     if (step.isInverted() && plugin.invertedStepCheck) {
+                        return;
+                    }
+                }
+                if (wStep != null) {
+                    if (wStep.isInverted() && plugin.invertedStepCheck) {
                         return;
                     }
                 }

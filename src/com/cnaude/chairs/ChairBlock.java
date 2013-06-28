@@ -13,10 +13,12 @@ import org.bukkit.Material;
 public class ChairBlock {
     private Material mat;
     private double sitHeight;
+    private byte data;
     
-    public ChairBlock(Material m, double d) {
+    public ChairBlock(Material m, double s, String d) {
         mat = m;
-        sitHeight = d;
+        sitHeight = s;
+        data = Byte.parseByte(d);
     }   
     
     public Material getMat() {
@@ -25,5 +27,9 @@ public class ChairBlock {
     
     public double getSitHeight() {
         return sitHeight;
+    }
+    
+    public byte getDamage() {
+        return data;
     }
 }
