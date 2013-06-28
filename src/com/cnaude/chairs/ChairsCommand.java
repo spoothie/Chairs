@@ -30,7 +30,7 @@ public class ChairsCommand implements CommandExecutor {
         } 
         if (args[0].equalsIgnoreCase("reload")) {
             if (sender.hasPermission("chairs.reload") || !(sender instanceof Player)) {
-                plugin.reloadConfig();
+                //plugin.reloadConfig();
                 plugin.loadConfig();
                 plugin.restartEffectsTask();
                 if (!plugin.msgReloaded.isEmpty()) {

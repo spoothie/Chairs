@@ -26,8 +26,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class Chairs extends JavaPlugin {
     private static Chairs instance = null;
     public static ChairEffects chairEffects;
-    public List<ChairBlock> allowedBlocks = new ArrayList<ChairBlock>();
-    public List<Material> validSigns = new ArrayList<Material>();    
+    public List<ChairBlock> allowedBlocks;
+    public List<Material> validSigns;
     public boolean sneaking, autoRotate, signCheck, permissions, notifyplayer, opsOverridePerms;
     public boolean invertedStairCheck, seatOccupiedCheck, invertedStepCheck, perItemPerms, ignoreIfBlockInHand;
     public boolean sitEffectsEnabled;
@@ -57,7 +57,7 @@ public class Chairs extends JavaPlugin {
         pluginFolder = getDataFolder();
         configFile = new File(pluginFolder, "config.yml");
         createConfig();
-        this.getConfig().options().copyDefaults(true);
+        getConfig().options().copyDefaults(true);
         saveConfig();
         loadConfig();
         getServer().getPluginManager().registerEvents(new EventListener(this, ignoreList), this);
@@ -149,6 +149,7 @@ public class Chairs extends JavaPlugin {
         msgDisabled = ChatColor.translateAlternateColorCodes('&',getConfig().getString("messages.disabled"));
         msgReloaded = ChatColor.translateAlternateColorCodes('&',getConfig().getString("messages.reloaded"));
 
+        allowedBlocks = new ArrayList<ChairBlock>();
         for (String s : getConfig().getStringList("allowed-blocks")) {
             String type;
             double sh = sittingHeight;
@@ -184,6 +185,7 @@ public class Chairs extends JavaPlugin {
             }
         }
         
+        validSigns = new ArrayList<Material>();    
         for (String type : getConfig().getStringList("valid-signs")) {            
             try {
                 if (type.matches("\\d+")) {
