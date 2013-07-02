@@ -53,24 +53,24 @@ public class EventListener implements Listener {
             }
         }
     }
-    
+
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) { 
+    public void onPlayerJoin(PlayerJoinEvent event) {
         delayedSitTask();
     }
-    
+
     @EventHandler
-    public void onPlayerTeleport(PlayerTeleportEvent event) { 
+    public void onPlayerTeleport(PlayerTeleportEvent event) {
         delayedSitTask();
     }
-    
+
     private void delayedSitTask() {
         plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
             @Override
-            public void run() {                
+            public void run() {
                 plugin.sendSit();
             }
-        }, 20 );  
+        }, 20);
     }
 
     @EventHandler
@@ -101,11 +101,11 @@ public class EventListener implements Listener {
             standList.clear();
         }
     }
-    
+
     public boolean isValidChair(Block block) {
         for (ChairBlock cb : plugin.allowedBlocks) {
             if (cb.getMat().equals(block.getType())) {
-                return true;                
+                return true;
             }
         }
         return false;
@@ -113,20 +113,20 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
-        if (event.getPlayer().getItemInHand().getType().isBlock() 
+        if (event.getPlayer().getItemInHand().getType().isBlock()
                 && (event.getPlayer().getItemInHand().getTypeId() != 0)
                 && plugin.ignoreIfBlockInHand) {
             return;
         }
         if (event.hasBlock() && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            
+
             Block block = event.getClickedBlock();
             Stairs stairs = null;
             Step step = null;
             WoodenStep wStep = null;
             double sh = plugin.sittingHeight;
-            boolean blockOkay = false;                        
-                        
+            boolean blockOkay = false;
+
             Player player = event.getPlayer();
             if (ignoreList.isIgnored(player.getName())) {
                 return;
@@ -149,11 +149,11 @@ public class EventListener implements Listener {
                             PermissionDefault.FALSE));
                 }
             }
-                        
+
             for (ChairBlock cb : plugin.allowedBlocks) {
                 //plugin.logInfo("Comparing: (" + cb.getMat().name() + " ? " + block.getType().name() + ") ("
                 //        + cb.getDamage() + " ? " + block.getData() + ")");
-                if (cb.getMat().equals(block.getType()) 
+                if (cb.getMat().equals(block.getType())
                         && cb.getDamage() == block.getData()) {
                     blockOkay = true;
                     sh = cb.getSitHeight();
@@ -165,7 +165,7 @@ public class EventListener implements Listener {
                     || (player.hasPermission("chairs.sit." + block.getType().toString() + ":" + block.getData()) && plugin.perItemPerms)
                     || (player.hasPermission("chairs.sit." + block.getTypeId()) && plugin.perItemPerms)
                     || (player.hasPermission("chairs.sit." + block.getType().toString()) && plugin.perItemPerms)) {
-                
+
                 if (block.getState().getData() instanceof Stairs) {
                     stairs = (Stairs) block.getState().getData();
                     //plugin.logInfo("STAIR");
@@ -185,11 +185,11 @@ public class EventListener implements Listener {
                 // Check if block beneath chair is solid.
                 if (block.getRelative(BlockFace.DOWN).isLiquid()) {
                     return;
-                }                
+                }
                 if (block.getRelative(BlockFace.DOWN).isEmpty()) {
                     return;
-                }                
-                if (!block.getRelative(BlockFace.DOWN).getType().isSolid()) {                        
+                }
+                if (!block.getRelative(BlockFace.DOWN).getType().isSolid()) {
                     return;
                 }
 
@@ -251,7 +251,7 @@ public class EventListener implements Listener {
                     } else if (stairs.getDescendingDirection() == BlockFace.EAST || stairs.getDescendingDirection() == BlockFace.WEST) {
                         chairwidth += getChairWidth(block, BlockFace.NORTH);
                         chairwidth += getChairWidth(block, BlockFace.SOUTH);
-                    }                                        
+                    }
 
                     if (chairwidth > plugin.maxChairWidth) {
                         return;
@@ -306,7 +306,7 @@ public class EventListener implements Listener {
                     }
                     plugin.sit.put(player.getName(), block.getLocation());
                     event.setUseInteractedBlock(Result.DENY);
-                    
+
                     delayedSitTask();
                 }
             }
@@ -319,7 +319,7 @@ public class EventListener implements Listener {
         // Go through the blocks next to the clicked block and check if there are any further stairs.
         for (int i = 1; i <= plugin.maxChairWidth; i++) {
             Block relative = block.getRelative(face, i);
-            if (relative.getState().getData() instanceof Stairs) {                
+            if (relative.getState().getData() instanceof Stairs) {
                 if (isValidChair(relative) && ((Stairs) relative.getState().getData()).getDescendingDirection() == ((Stairs) block.getState().getData()).getDescendingDirection()) {
                     width++;
                 } else {
@@ -334,46 +334,56 @@ public class EventListener implements Listener {
     private boolean checkSign(Block block, BlockFace face) {
         // Go through the blocks next to the clicked block and check if are signs on the end.
         for (int i = 1; i <= 100; i++) {
-            Block relative = block.getRelative(face, i);            
-            if (!isValidChair(relative) || (block.getState().getData() instanceof Stairs 
-                    && ((Stairs) relative.getState().getData()).getDescendingDirection() 
-                    != ((Stairs) block.getState().getData()).getDescendingDirection())) {
-                if (plugin.validSigns.contains(relative.getType())) {                
-                    return true;
-                } else {
-                    return false;
-                }
+            Block relative = block.getRelative(face, i);
+            if (checkDirection(block, relative)) {
+                continue;
+            }
+            if (plugin.validSigns.contains(relative.getType())) {
+                return true;
+            } else {
+                return false;
             }
         }
         return false;
     }
-    
+
+    private boolean checkDirection(Block block1, Block block2) {
+        if (block1.getState().getData() instanceof Stairs
+                && block2.getState().getData() instanceof Stairs) {
+            if (((Stairs) block1.getState().getData()).getDescendingDirection()
+                    .equals(((Stairs) block2.getState().getData()).getDescendingDirection())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean checkFrame(Block block, BlockFace face, Player player) {
         // Go through the blocks next to the clicked block and check if are signs on the end.
-        
-        for (int i = 1; i <= 100; i++) {            
-            Block relative = block.getRelative(face, i);          
-            int x = relative.getLocation().getBlockX();
-            int y = relative.getLocation().getBlockY();
-            int z = relative.getLocation().getBlockZ();                                
-            if (!isValidChair(relative) || (block.getState().getData() instanceof Stairs 
-                    && ((Stairs) relative.getState().getData()).getDescendingDirection() 
-                    != ((Stairs) block.getState().getData()).getDescendingDirection())) {
-                if (relative.getType().equals(Material.AIR)) {                                        
-                    for (Entity e : player.getNearbyEntities(plugin.distance, plugin.distance, plugin.distance)) {
-                        if (e instanceof ItemFrame && plugin.validSigns.contains(Material.ITEM_FRAME)) {
-                            int x2 = e.getLocation().getBlockX();
-                            int y2 = e.getLocation().getBlockY();
-                            int z2 = e.getLocation().getBlockZ();
-                            if (x == x2 && y == y2 && z == z2) {                                
-                                return true;
-                            }
+
+        for (int i = 1; i <= 100; i++) {
+            Block relative = block.getRelative(face, i);
+            if (checkDirection(block, relative)) {
+                continue;
+            }
+            if (relative.getType().equals(Material.AIR)) {
+                int x = relative.getLocation().getBlockX();
+                int y = relative.getLocation().getBlockY();
+                int z = relative.getLocation().getBlockZ();
+                for (Entity e : player.getNearbyEntities(plugin.distance, plugin.distance, plugin.distance)) {
+                    if (e instanceof ItemFrame && plugin.validSigns.contains(Material.ITEM_FRAME)) {
+                        int x2 = e.getLocation().getBlockX();
+                        int y2 = e.getLocation().getBlockY();
+                        int z2 = e.getLocation().getBlockZ();
+                        if (x == x2 && y == y2 && z == z2) {
+                            return true;
                         }
-                    }                    
-                } else {
-                    return false;
+                    }
                 }
-            }            
+                return false;
+            } else {
+                return false;
+            }
         }
         return false;
     }
