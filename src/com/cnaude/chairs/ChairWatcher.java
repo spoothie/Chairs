@@ -5,8 +5,8 @@
 package com.cnaude.chairs;
 
 import java.util.ArrayList;
-import net.minecraft.server.v1_5_R3.DataWatcher;
-import net.minecraft.server.v1_5_R3.WatchableObject;
+import net.minecraft.server.v1_6_R1.DataWatcher;
+import net.minecraft.server.v1_6_R1.WatchableObject;
 
 /**
  *
