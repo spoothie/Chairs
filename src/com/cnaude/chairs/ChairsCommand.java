@@ -68,7 +68,7 @@ public class ChairsCommand implements CommandExecutor {
                     }
                 }
             }
-            plugin.sendSit(p,Integer.parseInt(args[0]));
+            //plugin.sendSit(p,Integer.parseInt(args[0]));
         }
         return true;
     }

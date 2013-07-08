@@ -249,16 +249,7 @@ public class Chairs extends JavaPlugin {
         } else {            
             sendPacketToPlayers(new Packet40EntityMetadata(p.getPlayer().getEntityId(), new ChairWatcher((byte) packet), false),p);                        
         }
-    }        
-    
-    public void sendSit(Player p, int i) {              
-        if (protocolManager != null) {
-            sendPacketToPlayers(getSitPacket(p),p);
-        } else {            
-            p.sendMessage("sit: " + i);
-            sendPacketToPlayers(new Packet40EntityMetadata(p.getPlayer().getEntityId(), new ChairWatcher((byte) i), false),p);                        
-        }
-    }        
+    }                   
     
     private void sendPacketToPlayers(PacketContainer pc, Player p) {
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
