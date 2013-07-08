@@ -35,6 +35,7 @@ public class EventListener implements Listener {
         this.ignoreList = ignoreList;
     }
 
+    
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
@@ -148,12 +149,28 @@ public class EventListener implements Listener {
                             "Allow players to sit on a '" + block.getType().name() + "'",
                             PermissionDefault.FALSE));
                 }
+                if (plugin.pm.getPermission("chairs.sit." + block.getTypeId() + ":" + block.getData()) == null) {
+                    plugin.pm.addPermission(new Permission("chairs.sit." + block.getTypeId() + ":" + block.getData(),
+                            "Allow players to sit on a '" + block.getType().name() + "'",
+                            PermissionDefault.FALSE));
+                }
+                if (plugin.pm.getPermission("chairs.sit." + block.getType().toString() + ":" + block.getData()) == null) {
+                    plugin.pm.addPermission(new Permission("chairs.sit." + block.getType().toString() + ":" + block.getData(),
+                            "Allow players to sit on a '" + block.getType().name() + "'",
+                            PermissionDefault.FALSE));
+                }
             }
 
             for (ChairBlock cb : plugin.allowedBlocks) {
-                //plugin.logInfo("Comparing: (" + cb.getMat().name() + " ? " + block.getType().name() + ") ("
-                //        + cb.getDamage() + " ? " + block.getData() + ")");
-                if (cb.getMat().equals(block.getType())
+                plugin.logInfo("Comparing: (" + cb.getMat().name() + " ? " + block.getType().name() + ") ("
+                        + cb.getDamage() + " ? " + block.getData() + ")");
+                if (cb.getMat().toString().contains("STAIRS")) {
+                    if (cb.getMat().equals(block.getType())) {
+                        blockOkay = true;
+                        sh = cb.getSitHeight();
+                        continue;
+                    }
+                } else if (cb.getMat().equals(block.getType())
                         && cb.getDamage() == block.getData()) {
                     blockOkay = true;
                     sh = cb.getSitHeight();

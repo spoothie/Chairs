@@ -5,8 +5,8 @@
 package com.cnaude.chairs;
 
 import java.util.ArrayList;
-import net.minecraft.server.v1_6_R1.DataWatcher;
-import net.minecraft.server.v1_6_R1.WatchableObject;
+import net.minecraft.server.v1_5_R3.DataWatcher;
+import net.minecraft.server.v1_5_R3.WatchableObject;
 
 /**
  *
@@ -24,6 +24,7 @@ public class ChairWatcher extends DataWatcher {
     public ArrayList<WatchableObject> b() {
         ArrayList<WatchableObject> list = new ArrayList<WatchableObject>();
         WatchableObject wo = new WatchableObject(0, 0, Byte.valueOf(this.metadata));
+        //WatchableObject wo = new WatchableObject(0, 0, 4);
         list.add(wo);
         return list;
     }

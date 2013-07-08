@@ -10,12 +10,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.server.v1_6_R1.Packet40EntityMetadata;
+import net.minecraft.server.v1_5_R3.Packet40EntityMetadata;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_6_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_5_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.permissions.Permission;
@@ -39,6 +39,7 @@ public class Chairs extends JavaPlugin {
     private File pluginFolder;
     private File configFile;
     public byte metadata;
+    public int packet;
     public HashMap<String, Location> sit = new HashMap<String, Location>();
     public static final String PLUGIN_NAME = "Chairs";
     public static final String LOG_HEADER = "[" + PLUGIN_NAME + "]";
@@ -119,7 +120,9 @@ public class Chairs extends JavaPlugin {
         return (getServer().getPluginManager().getPlugin("ProtocolLib") != null);
     }
 
-    public void loadConfig() {       
+    public void loadConfig() {     
+        packet = getConfig().getInt("packet");
+        logInfo("Sitting packet byte: " + packet);
         autoRotate = getConfig().getBoolean("auto-rotate");
         sneaking = getConfig().getBoolean("sneaking");
         signCheck = getConfig().getBoolean("sign-check");
@@ -156,7 +159,7 @@ public class Chairs extends JavaPlugin {
             String d = "0";
             if (s.contains(":")) {
                 String tmp[] = s.split(":",3);
-                type = tmp[0]; 
+                type = tmp[0];                 
                 if (!tmp[1].isEmpty()) {
                     sh = Double.parseDouble(tmp[1]);
                 }                
@@ -173,7 +176,7 @@ public class Chairs extends JavaPlugin {
                 } else {
                     mat = Material.matchMaterial(type);
                 }
-                if (mat != null) {
+                if (mat != null) {                    
                     logInfo("Allowed block: " + mat.toString() + " => " + sh + " => " + d);
                     allowedBlocks.add(new ChairBlock(mat,sh,d));
                 } else {
@@ -225,7 +228,7 @@ public class Chairs extends JavaPlugin {
         PacketContainer fakeSit = protocolManager.createPacket(40); 
         fakeSit.getSpecificModifier(int.class).write(0, p.getEntityId());
         WrappedDataWatcher watcher = new WrappedDataWatcher();
-        watcher.setObject(0, (byte)4);           
+        watcher.setObject(0, (byte)packet);           
         fakeSit.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects());
         return fakeSit;
     }
@@ -243,9 +246,17 @@ public class Chairs extends JavaPlugin {
     public void sendSit(Player p) {              
         if (protocolManager != null) {
             sendPacketToPlayers(getSitPacket(p),p);
-        } else {
-            Packet40EntityMetadata packet = new Packet40EntityMetadata(p.getPlayer().getEntityId(), new ChairWatcher((byte) 4), false);
-            sendPacketToPlayers(packet,p);
+        } else {            
+            sendPacketToPlayers(new Packet40EntityMetadata(p.getPlayer().getEntityId(), new ChairWatcher((byte) packet), false),p);                        
+        }
+    }        
+    
+    public void sendSit(Player p, int i) {              
+        if (protocolManager != null) {
+            sendPacketToPlayers(getSitPacket(p),p);
+        } else {            
+            p.sendMessage("sit: " + i);
+            sendPacketToPlayers(new Packet40EntityMetadata(p.getPlayer().getEntityId(), new ChairWatcher((byte) i), false),p);                        
         }
     }        
     
