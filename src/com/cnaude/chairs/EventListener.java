@@ -162,8 +162,8 @@ public class EventListener implements Listener {
             }
 
             for (ChairBlock cb : plugin.allowedBlocks) {
-                plugin.logInfo("Comparing: (" + cb.getMat().name() + " ? " + block.getType().name() + ") ("
-                        + cb.getDamage() + " ? " + block.getData() + ")");
+                //plugin.logInfo("Comparing: (" + cb.getMat().name() + " ? " + block.getType().name() + ") ("
+                //        + cb.getDamage() + " ? " + block.getData() + ")");
                 if (cb.getMat().toString().contains("STAIRS")) {
                     if (cb.getMat().equals(block.getType())) {
                         blockOkay = true;
