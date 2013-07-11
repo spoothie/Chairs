@@ -42,7 +42,7 @@ public class ChairEffects {
                             double pHealthPcnt = (double) p.getHealth() / (double) p.getMaxHealth() * 100d;
                             if ((pHealthPcnt < plugin.sitMaxHealth)
                                     && (p.getHealth() < p.getMaxHealth())) {
-                                int newHealth = plugin.sitHealthPerInterval + p.getHealth();
+                                double newHealth = plugin.sitHealthPerInterval + p.getHealth();
                                 if (newHealth > p.getMaxHealth()) {
                                     newHealth = p.getMaxHealth();
                                 }

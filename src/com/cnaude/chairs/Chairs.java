@@ -10,12 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.server.v1_5_R3.Packet40EntityMetadata;
-import org.bukkit.Bukkit;
+import net.minecraft.server.v1_6_R2.Packet40EntityMetadata;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_5_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_6_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.permissions.Permission;
@@ -37,9 +36,8 @@ public class Chairs extends JavaPlugin {
     public int sitHealthPerInterval;
     public int sitEffectInterval;
     private File pluginFolder;
-    private File configFile;
-    public byte metadata;
-    public int packet;
+    private File configFile;    
+    public byte sitByte;
     public HashMap<String, Location> sit = new HashMap<String, Location>();
     public static final String PLUGIN_NAME = "Chairs";
     public static final String LOG_HEADER = "[" + PLUGIN_NAME + "]";
@@ -121,8 +119,8 @@ public class Chairs extends JavaPlugin {
     }
 
     public void loadConfig() {     
-        packet = getConfig().getInt("packet");
-        logInfo("Sitting packet byte: " + packet);
+        sitByte = Byte.parseByte(getConfig().getString("packet"));
+        logInfo("Sitting packet byte: " + sitByte);
         autoRotate = getConfig().getBoolean("auto-rotate");
         sneaking = getConfig().getBoolean("sneaking");
         signCheck = getConfig().getBoolean("sign-check");
@@ -228,7 +226,7 @@ public class Chairs extends JavaPlugin {
         PacketContainer fakeSit = protocolManager.createPacket(40); 
         fakeSit.getSpecificModifier(int.class).write(0, p.getEntityId());
         WrappedDataWatcher watcher = new WrappedDataWatcher();
-        watcher.setObject(0, (byte)packet);           
+        watcher.setObject(0, sitByte);           
         fakeSit.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects());
         return fakeSit;
     }
@@ -247,12 +245,12 @@ public class Chairs extends JavaPlugin {
         if (protocolManager != null) {
             sendPacketToPlayers(getSitPacket(p),p);
         } else {            
-            sendPacketToPlayers(new Packet40EntityMetadata(p.getPlayer().getEntityId(), new ChairWatcher((byte) packet), false),p);                        
+            sendPacketToPlayers(new Packet40EntityMetadata(p.getPlayer().getEntityId(), new ChairWatcher(sitByte), true),p);                        
         }
     }                   
     
     private void sendPacketToPlayers(PacketContainer pc, Player p) {
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+        for (Player onlinePlayer : getServer().getOnlinePlayers()) {
             if (onlinePlayer.canSee(p)) {
                 if (onlinePlayer.getWorld().equals(p.getWorld())) {
                     try {         
@@ -266,7 +264,7 @@ public class Chairs extends JavaPlugin {
     }
     
     private void sendPacketToPlayers(Packet40EntityMetadata packet, Player p) {
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+        for (Player onlinePlayer : getServer().getOnlinePlayers()) {
             if (onlinePlayer.canSee(p)) {
                 if (onlinePlayer.getWorld().equals(p.getWorld())) {
                     try {         
@@ -281,7 +279,7 @@ public class Chairs extends JavaPlugin {
     
     public void sendSit() {
         for (String s : sit.keySet()) {            
-            Player p = Bukkit.getPlayer(s);
+            Player p = getServer().getPlayer(s);
             if (p != null) {
                 sendSit(p);
             }
@@ -299,7 +297,7 @@ public class Chairs extends JavaPlugin {
         if (protocolManager != null) {
             sendPacketToPlayers(getStandPacket(p),p);
         } else {
-            Packet40EntityMetadata packet = new Packet40EntityMetadata(p.getPlayer().getEntityId(), new ChairWatcher((byte) 0), false);
+            Packet40EntityMetadata packet = new Packet40EntityMetadata(p.getPlayer().getEntityId(), new ChairWatcher((byte)0), false);
             sendPacketToPlayers(packet,p);
         }
     }
