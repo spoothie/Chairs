@@ -2,7 +2,7 @@ package net.spoothie.chairs;
 
 import java.util.ArrayList;
 import java.util.List;
-
+bb
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
