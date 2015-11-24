@@ -11,9 +11,9 @@ import org.bukkit.Material;
  * @author cnaude
  */
 public class ChairBlock {
-    private Material mat;
-    private double sitHeight;
-    private byte data;
+    private final Material mat;
+    private final double sitHeight;
+    private final byte data;
     
     public ChairBlock(Material m, double s, String d) {
         mat = m;

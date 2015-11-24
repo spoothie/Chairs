@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.cnaude.chairs;
 
 import java.util.ArrayList;
@@ -14,7 +10,7 @@ import net.minecraft.server.v1_6_R2.WatchableObject;
  */
 public class ChairWatcher extends DataWatcher {
 
-    private byte metadata;
+    private final byte metadata;
 
     public ChairWatcher(byte i) {
         this.metadata = i;
@@ -22,7 +18,7 @@ public class ChairWatcher extends DataWatcher {
 
     @Override
     public ArrayList<WatchableObject> b() {
-        ArrayList<WatchableObject> list = new ArrayList<WatchableObject>();
+        ArrayList<WatchableObject> list = new ArrayList<>();
         WatchableObject wo = new WatchableObject(0, 0, this.metadata);        
         list.add(wo);
         return list;

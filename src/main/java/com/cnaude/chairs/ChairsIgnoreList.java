@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.cnaude.chairs;
 
 import java.io.*;
@@ -13,7 +9,7 @@ import java.util.ArrayList;
  */
 @SuppressWarnings("serial")
 public class ChairsIgnoreList implements Serializable{
-    private static ArrayList<String> ignoreList = new ArrayList<String>();
+    private static ArrayList<String> ignoreList = new ArrayList<>();
     private static final String IGNORE_FILE = "plugins/Chairs/ignores.ser";
     
     @SuppressWarnings("unchecked")
@@ -25,12 +21,12 @@ public class ChairsIgnoreList implements Serializable{
         }
         try {                
             FileInputStream f_in = new FileInputStream(file);
-            ObjectInputStream obj_in = new ObjectInputStream (f_in);
-            ignoreList = (ArrayList<String>) obj_in.readObject();
-            obj_in.close();               
+            try (ObjectInputStream obj_in = new ObjectInputStream (f_in)) {
+                ignoreList = (ArrayList<String>) obj_in.readObject();
+            }               
             Chairs.get().logInfo("Loaded ignore list. (Count = "+ignoreList.size()+")");
         }
-        catch(Exception e) {
+        catch(IOException | ClassNotFoundException e) {
           Chairs.get().logError(e.getMessage());
         }
     }
@@ -39,9 +35,9 @@ public class ChairsIgnoreList implements Serializable{
         try {
             File file = new File(IGNORE_FILE); 
             FileOutputStream f_out = new FileOutputStream (file);
-            ObjectOutputStream obj_out = new ObjectOutputStream (f_out);
-            obj_out.writeObject (ignoreList);
-            obj_out.close();
+            try (ObjectOutputStream obj_out = new ObjectOutputStream (f_out)) {
+                obj_out.writeObject (ignoreList);
+            }
             Chairs.get().logInfo("Saved ignore list. (Count = "+ignoreList.size()+")");
         }
         catch(Exception e) {
@@ -63,11 +59,6 @@ public class ChairsIgnoreList implements Serializable{
     }
     
     public boolean isIgnored(String s) {
-        if (ignoreList.contains(s)) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return ignoreList.contains(s);
     }
 }

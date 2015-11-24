@@ -89,7 +89,7 @@ public class EventListener implements Listener {
     public void onBlockDestroy(BlockBreakEvent event) {
         Block block = event.getBlock();
         if (!plugin.sit.isEmpty()) {
-            ArrayList<String> standList = new ArrayList<String>();
+            ArrayList<String> standList = new ArrayList<>();
             for (String s : plugin.sit.keySet()) {
                 if (plugin.sit.get(s).equals(block.getLocation())) {
                     standList.add(s);
@@ -168,13 +168,11 @@ public class EventListener implements Listener {
                     if (cb.getMat().equals(block.getType())) {
                         blockOkay = true;
                         sh = cb.getSitHeight();
-                        continue;
                     }
                 } else if (cb.getMat().equals(block.getType())
                         && cb.getDamage() == block.getData()) {
                     blockOkay = true;
                     sh = cb.getSitHeight();
-                    continue;
                 }
             }
             if (blockOkay
@@ -355,11 +353,7 @@ public class EventListener implements Listener {
             if (checkDirection(block, relative)) {
                 continue;
             }
-            if (plugin.validSigns.contains(relative.getType())) {
-                return true;
-            } else {
-                return false;
-            }
+            return plugin.validSigns.contains(relative.getType());
         }
         return false;
     }

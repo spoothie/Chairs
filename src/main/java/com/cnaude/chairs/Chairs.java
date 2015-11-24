@@ -38,10 +38,10 @@ public class Chairs extends JavaPlugin {
     private File pluginFolder;
     private File configFile;    
     public byte sitByte;
-    public HashMap<String, Location> sit = new HashMap<String, Location>();
+    public HashMap<String, Location> sit = new HashMap<>();
     public static final String PLUGIN_NAME = "Chairs";
     public static final String LOG_HEADER = "[" + PLUGIN_NAME + "]";
-    static final Logger log = Logger.getLogger("Minecraft");
+    static final Logger LOG = Logger.getLogger("Minecraft");
     public PluginManager pm;
     public static ChairsIgnoreList ignoreList; 
     public String msgSitting, msgStanding, msgOccupied, msgNoPerm, msgReloaded, msgDisabled, msgEnabled;
@@ -150,7 +150,7 @@ public class Chairs extends JavaPlugin {
         msgDisabled = ChatColor.translateAlternateColorCodes('&',getConfig().getString("messages.disabled"));
         msgReloaded = ChatColor.translateAlternateColorCodes('&',getConfig().getString("messages.reloaded"));
 
-        allowedBlocks = new ArrayList<ChairBlock>();
+        allowedBlocks = new ArrayList<>();
         for (String s : getConfig().getStringList("allowed-blocks")) {
             String type;
             double sh = sittingHeight;
@@ -186,7 +186,7 @@ public class Chairs extends JavaPlugin {
             }
         }
         
-        validSigns = new ArrayList<Material>();    
+        validSigns = new ArrayList<>();    
         for (String type : getConfig().getStringList("valid-signs")) {            
             try {
                 if (type.matches("\\d+")) {
@@ -200,7 +200,7 @@ public class Chairs extends JavaPlugin {
             }
         }
         
-        ArrayList<String> perms = new ArrayList<String>();
+        ArrayList<String> perms = new ArrayList<>();
         perms.add("chairs.sit");
         perms.add("chairs.reload");
         perms.add("chairs.self");
@@ -303,11 +303,11 @@ public class Chairs extends JavaPlugin {
     }
     
     public void logInfo(String _message) {
-        log.log(Level.INFO, String.format("%s %s", LOG_HEADER, _message));
+        LOG.log(Level.INFO, String.format("%s %s", LOG_HEADER, _message));
     }
 
     public void logError(String _message) {
-        log.log(Level.SEVERE, String.format("%s %s", LOG_HEADER, _message));
+        LOG.log(Level.SEVERE, String.format("%s %s", LOG_HEADER, _message));
     }
     
     public static Chairs get() {
