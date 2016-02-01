@@ -1,0 +1,17 @@
+name: Chairs
+version: 2.1.6-SNAPSHOT1
+description: Let players sit on blocks.
+website: http://dev.bukkit.org/bukkit-plugins/chairsreloaded/
+authors: 
+ - spoothie
+ - cnaude
+main: com.cnaude.chairs.Chairs
+softdepend:
+- ProtocolLib
+commands:
+    chairs:
+        description: Various commands for Chairs.
+        usage: |
+          /<command> reload - reloads the configuration
+          /<command> off  - disable chairs for self
+          /<command> on - enable chairs for self
